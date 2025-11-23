@@ -3,19 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Watch OS Emulator v0.1</title>
+    <title>BlueSteel OS Emulator v0.3</title>
+    <!-- Importing a Dot Matrix style font -->
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <style>
         :root {
             --bezel-color: #1a1a1a;
             --screen-bg: #000000;
-            --oled-on: #33E5FF; /* Cyan/Blue OLED */
-            --oled-dim: #0d3d45;
-            --case-metal: #4a4a4a;
+            --oled-on: #33E5FF;
+            --oled-dim: #114c55;
+            --case-metal: #2d2d2d;
         }
 
         body {
-            background-color: #121212;
-            color: #eee;
+            background-color: #e0e0e0;
+            color: #333;
             font-family: 'Courier New', Courier, monospace;
             display: flex;
             flex-direction: column;
@@ -26,77 +28,94 @@
             user-select: none;
         }
 
-        /* The Watch Case */
+        /* The Watch Case - Rectangular & Compact */
         .watch-case {
             position: relative;
-            width: 300px;
-            height: 420px;
+            padding: 20px 20px; /* Bezel thickness */
             background-color: var(--bezel-color);
-            border-radius: 40px;
-            box-shadow: 
-                inset 0 0 20px #000,
-                0 10px 30px rgba(0,0,0,0.5);
+            border-radius: 6px; /* Slightly rounded corners */
             display: flex;
             justify-content: center;
             align-items: center;
             border: 4px solid var(--case-metal);
+            
+            /* Shadow Bottom Right */
+            box-shadow: 
+                inset 0 0 10px #000,
+                15px 15px 25px rgba(0,0,0,0.5);
         }
 
-        /* The Screen */
+        /* The Screen - 1:1 Scale (True 128x64) */
         canvas {
             background-color: var(--screen-bg);
             image-rendering: pixelated;
-            border-radius: 4px; /* Slight curve on screen corners */
-            box-shadow: 0 0 10px var(--oled-dim);
+            width: 128px;
+            height: 64px;
+            /* No border-radius for the screen itself, raw pixels */
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.8); 
         }
 
-        /* Post-processing effects for retro feel */
         .screen-overlay {
             position: absolute;
-            width: 256px;
-            height: 364px;
+            top: 20px; left: 20px; /* Match padding */
+            width: 128px;
+            height: 64px;
             pointer-events: none;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            background-size: 100% 2px, 3px 100%;
-            border-radius: 4px;
-            opacity: 0.4;
+            /* Scanlines */
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%);
+            background-size: 100% 2px;
+            opacity: 0.6;
         }
 
-        /* Physical Controls UI (Visual Only) */
         .controls-hint {
-            margin-top: 20px;
+            margin-top: 40px;
             text-align: center;
             font-size: 0.8rem;
-            opacity: 0.7;
+            color: #555;
         }
         .key {
             display: inline-block;
-            background: #333;
+            background: #ddd;
             padding: 2px 6px;
             border-radius: 4px;
             font-weight: bold;
-            border: 1px solid #555;
+            border: 1px solid #bbb;
+            color: #000;
         }
 
-        /* Hardware Button Simulation styling */
+        /* Controls */
         .btn-physical {
             position: absolute;
             background: var(--case-metal);
-            border: 1px solid #222;
+            border: 1px solid #111;
             transition: transform 0.1s;
         }
+        
         .crown {
-            right: -12px;
-            top: 80px;
-            width: 12px;
-            height: 30px;
-            border-radius: 0 4px 4px 0;
+            right: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 20px;
+            border-radius: 0 2px 2px 0;
             background: repeating-linear-gradient(0deg, #333, #333 2px, #555 3px);
         }
-        .btn1 { right: -8px; top: 40px; width: 8px; height: 20px; border-radius: 0 4px 4px 0; }
-        .btn2 { right: -8px; top: 130px; width: 8px; height: 20px; border-radius: 0 4px 4px 0; }
+        .btn1 { 
+            right: -6px; 
+            top: 15px; 
+            width: 6px; 
+            height: 15px; 
+            border-radius: 0 2px 2px 0;
+        }
+        .btn2 { 
+            right: -6px; 
+            bottom: 15px; 
+            width: 6px; 
+            height: 15px; 
+            border-radius: 0 2px 2px 0;
+        }
 
-        .active-btn { transform: translateX(-2px); filter: brightness(1.2); }
+        .active-btn { filter: brightness(1.5); }
     </style>
 </head>
 <body>
@@ -106,38 +125,38 @@
         <div id="phy-crown" class="btn-physical crown"></div>
         <div id="phy-btn2" class="btn-physical btn2"></div>
         
-        <canvas id="display" width="256" height="364"></canvas>
+        <!-- 128x64 Resolution -->
+        <canvas id="display" width="128" height="64"></canvas>
         <div class="screen-overlay"></div>
     </div>
 
     <div class="controls-hint">
         <p><span class="key">↑/↓</span> Crown Rotate &nbsp;|&nbsp; <span class="key">Enter</span> Crown Press</p>
-        <p><span class="key">Z</span> Btn 1 (Select/Light) &nbsp;|&nbsp; <span class="key">X</span> Btn 2 (Back)</p>
+        <p><span class="key">Z</span> Btn 1 (Select) &nbsp;|&nbsp; <span class="key">X</span> Btn 2 (Back)</p>
     </div>
 
 <script>
 /**
- * BLUESTEEL OS - FIRMWARE EMULATION
- * Architecture: Finite State Machine (FSM)
- * Author: Luis's AI Assistant
+ * BLUESTEEL OS v0.3 - PROTOTYPE EDITION
+ * Resolution: 128x64 (1:1 Scale)
+ * Font: Dot Matrix (VT323)
  */
 
 // --- CONSTANTS & CONFIG ---
-const SCREEN_W = 256;
-const SCREEN_H = 364;
+const SCREEN_W = 128;
+const SCREEN_H = 64;
 const FPS = 30;
 const COLOR_ON = "#33E5FF";
 const COLOR_OFF = "#000000";
-const COLOR_DIM = "#0d3d45";
+const COLOR_DIM = "#114c55";
 
-// --- CORE SYSTEM (Hardware Layer) ---
+// --- CORE SYSTEM ---
 
 class AudioController {
     constructor() {
         this.ctx = new (window.AudioContext || window.webkitAudioContext)();
         this.volume = 0.1;
     }
-
     playTone(freq, type, duration) {
         if (this.ctx.state === 'suspended') this.ctx.resume();
         const osc = this.ctx.createOscillator();
@@ -151,49 +170,28 @@ class AudioController {
         osc.start();
         osc.stop(this.ctx.currentTime + duration);
     }
-
-    beep() { this.playTone(800, 'square', 0.1); }
-    chime() { this.playTone(1200, 'sine', 0.3); }
-    alarm() { 
-        this.playTone(1500, 'sawtooth', 0.2); 
-        setTimeout(() => this.playTone(1500, 'sawtooth', 0.2), 250);
-    }
+    beep() { this.playTone(800, 'square', 0.05); }
+    chime() { this.playTone(1200, 'sine', 0.2); }
 }
 
 class SimulatedSensors {
     constructor() {
-        this.heartRate = 65;
-        this.steps = 4203;
+        this.heartRate = 142;
         this.battery = 84;
-        this.gpsLocked = false;
-        this.altitude = 150; // meters
-        this.pressure = 1013; // hPa
+        this.gpsLocked = true;
         this.heading = 0;
-        
-        // Simulation loop
         setInterval(() => {
-            this.heartRate = 60 + Math.floor(Math.random() * 10);
-            this.heading = (this.heading + 1) % 360;
-            this.gpsLocked = Math.random() > 0.2; // 80% chance of lock
-            if(Math.random() > 0.9) this.altitude += (Math.random() > 0.5 ? 1 : -1);
+            this.heartRate = 138 + Math.floor(Math.random() * 8);
+            this.heading = (this.heading + 5) % 360;
         }, 1000);
     }
 }
 
 class FileSystem {
     save(filename, content) {
-        const blob = new Blob([content], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        a.click();
-        URL.revokeObjectURL(url);
-        console.log(`[FS] Exported: ${filename}`);
+        console.log(`[FS] Saving ${filename}...`);
     }
 }
-
-// --- GRAPHICS ENGINE ---
 
 class Graphics {
     constructor(canvasId) {
@@ -201,26 +199,24 @@ class Graphics {
         this.ctx = this.canvas.getContext('2d');
         this.ctx.imageSmoothingEnabled = false;
     }
-
     clear() {
         this.ctx.fillStyle = COLOR_OFF;
         this.ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);
     }
-
-    text(str, x, y, size = 14, align = "left", color = COLOR_ON) {
-        this.ctx.font = `${size}px monospace`; // Force monospace
+    // Updated font stack for dot matrix look
+    text(str, x, y, size = 16, align = "left", color = COLOR_ON) {
+        this.ctx.font = `${size}px 'VT323', monospace`; 
         this.ctx.fillStyle = color;
         this.ctx.textAlign = align;
-        this.ctx.fillText(str.toUpperCase(), x, y);
+        // Adjust Y slightly because custom fonts render differently than system mono
+        this.ctx.fillText(str, x, y);
     }
-
     rect(x, y, w, h, filled = true) {
         this.ctx.strokeStyle = COLOR_ON;
         this.ctx.fillStyle = COLOR_ON;
         if (filled) this.ctx.fillRect(x, y, w, h);
         else this.ctx.strokeRect(x, y, w, h);
     }
-
     line(x1, y1, x2, y2) {
         this.ctx.strokeStyle = COLOR_ON;
         this.ctx.beginPath();
@@ -230,15 +226,13 @@ class Graphics {
     }
 }
 
-// --- MODE BASE CLASS ---
-
 class Mode {
     constructor(os) { this.os = os; }
-    enter() {} // Called when switching to this mode
-    exit() {}  // Called when leaving
-    update(dt) {} // Logic loop
-    draw(gfx) {}  // Render loop
-    onInput(event, type) {} // event: UP, DOWN, ENTER, BTN1, BTN2
+    enter() {} 
+    exit() {}
+    update(dt) {}
+    draw(gfx) {}
+    onInput(event, type) {}
 }
 
 // --- MODES IMPLEMENTATION ---
@@ -246,293 +240,125 @@ class Mode {
 class HomeMode extends Mode {
     draw(gfx) {
         const d = new Date();
-        const timeStr = d.toLocaleTimeString('en-GB', { hour12: !this.os.settings.use24h });
-        const dateStr = d.toDateString();
+        const timeStr = d.toLocaleTimeString('en-US', { hour12: true, hour: 'numeric', minute: '2-digit' });
+        const dateStr = d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
 
-        // Header
-        gfx.text(this.os.sensors.gpsLocked ? "GPS OK" : "NO GPS", 10, 20, 10);
-        gfx.text(`${this.os.sensors.battery}%`, SCREEN_W - 30, 20, 10, "right");
+        // +------------------------------+
+        // |        12:45 PM              |
+        // |      Tue 21 Nov 2025         |
+        // +------------------------------+
 
-        // Main Time
-        gfx.text(timeStr, SCREEN_W/2, 160, 48, "center");
-        gfx.text(dateStr, SCREEN_W/2, 190, 16, "center");
-
-        // Widgets
-        gfx.line(20, 230, SCREEN_W-20, 230);
-        gfx.text(`STEPS: ${this.os.sensors.steps}`, SCREEN_W/2, 250, 14, "center");
-        gfx.text(`HR: ${this.os.sensors.heartRate}`, SCREEN_W/2, 270, 14, "center");
-
-        // Hints
-        gfx.text("[Hold Crown: Menu]", SCREEN_W/2, 340, 10, "center", COLOR_DIM);
+        gfx.text(timeStr, SCREEN_W/2, 30, 26, "center", COLOR_ON);
+        gfx.text(dateStr, SCREEN_W/2, 50, 16, "center", COLOR_ON);
     }
-
     onInput(e, type) {
-        if (type === 'long_press' && e === 'ENTER') {
-            this.os.switchMode('menu');
-        } else if (type === 'click' && e === 'ENTER') {
-            this.os.switchMode('info');
-        }
+        if (type === 'long_press' && e === 'ENTER') this.os.switchMode('menu');
     }
 }
 
 class MenuMode extends Mode {
     constructor(os) {
         super(os);
-        this.items = [
-            { label: "Stopwatch", id: "stopwatch" },
-            { label: "Timer", id: "timer" },
-            { label: "Alarms", id: "alarm" },
-            { label: "Workout", id: "workout" },
-            { label: "Compass", id: "compass" },
-            { label: "Settings", id: "settings" },
-            { label: "Back", id: "home" }
-        ];
+        this.items = ["Stopwatch", "Alarms", "Workout", "Compass", "Info", "Exit"];
         this.selected = 0;
     }
-
     draw(gfx) {
-        gfx.text("-- MENU --", SCREEN_W/2, 30, 16, "center");
+        // +------------------------------+
+        // | > Stopwatch                  |
+        // |    Alarms                    |
+        // +------------------------------+
         
-        let startY = 60;
-        const itemH = 30;
+        const startY = 25; // Start drawing text here
+        const h = 20; // Line height
+        
+        // Viewport window logic (show 3 items max)
+        const windowSize = 3;
+        let startIdx = 0;
+        if (this.selected >= windowSize) {
+            startIdx = this.selected - windowSize + 1;
+        }
 
-        this.items.forEach((item, idx) => {
-            const isSelected = idx === this.selected;
-            const y = startY + (idx * itemH);
+        for (let i = 0; i < windowSize; i++) {
+            const itemIdx = startIdx + i;
+            if (itemIdx >= this.items.length) break;
+
+            const item = this.items[itemIdx];
+            const y = startY + (i * h);
+            const isSel = itemIdx === this.selected;
             
-            if (isSelected) {
-                gfx.rect(10, y - 15, SCREEN_W - 20, 24, false); // Selection box
-                gfx.text(">", 20, y, 16);
+            if (isSel) {
+                gfx.text(">", 10, y, 20, "left", COLOR_ON);
             }
-            gfx.text(item.label, 40, y, 16, "left", isSelected ? COLOR_ON : COLOR_DIM);
-        });
+            gfx.text(item, 25, y, 20, "left", isSel ? COLOR_ON : COLOR_DIM);
+        }
     }
-
     onInput(e, type) {
-        if (type !== 'click' && type !== 'rotate') return;
-
-        if (e === 'DOWN') this.selected = (this.selected + 1) % this.items.length;
-        if (e === 'UP') this.selected = (this.selected - 1 + this.items.length) % this.items.length;
-        if (e === 'ENTER') this.os.switchMode(this.items[this.selected].id);
+        if (type === 'rotate') {
+            if (e === 'DOWN') this.selected = (this.selected + 1) % this.items.length;
+            if (e === 'UP') this.selected = (this.selected - 1 + this.items.length) % this.items.length;
+        }
+        if (type === 'click' && e === 'ENTER') {
+            const map = { "Exit": "home", "Stopwatch": "stopwatch", "Workout": "workout", "Compass": "compass", "Info": "info" };
+            if(map[this.items[this.selected]]) this.os.switchMode(map[this.items[this.selected]]);
+        }
         if (e === 'BTN2') this.os.switchMode('home');
     }
 }
 
-class StopwatchMode extends Mode {
-    constructor(os) {
-        super(os);
-        this.running = false;
-        this.startTime = 0;
-        this.elapsed = 0;
-        this.laps = [];
-    }
-
-    update(dt) {
-        if (this.running) {
-            this.elapsed = Date.now() - this.startTime;
-        }
-    }
-
-    formatTime(ms) {
-        const s = Math.floor(ms / 1000);
-        const m = Math.floor(s / 60);
-        const centi = Math.floor((ms % 1000) / 10);
-        return `${m.toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}.${centi.toString().padStart(2,'0')}`;
-    }
-
+class WorkoutMode extends Mode {
+    constructor(os) { super(os); this.dist=0; }
+    update(dt) { this.dist += 0.001; }
     draw(gfx) {
-        gfx.text("STOPWATCH", SCREEN_W/2, 30, 16, "center");
-        gfx.text(this.formatTime(this.elapsed), SCREEN_W/2, 100, 40, "center");
+        // +------------------------------+
+        // | Pace: 5:21/km                |
+        // | HR: 142                      |
+        // +------------------------------+
 
-        if (this.laps.length > 0) {
-            gfx.text(`LAP ${this.laps.length}`, SCREEN_W/2, 140, 14, "center");
-            gfx.text(this.formatTime(this.laps[this.laps.length-1]), SCREEN_W/2, 160, 14, "center");
-        }
-
-        // Controls
-        gfx.text("BTN1: START/STOP", 10, 320, 12);
-        gfx.text("BTN2: LAP/RESET", 10, 340, 12);
-        gfx.text("HOLD ENTER: EXPORT", 10, 300, 12, "left", COLOR_DIM);
+        gfx.text("Pace: 5:21/km", 5, 25, 20, "left", COLOR_ON);
+        gfx.text(`HR: ${this.os.sensors.heartRate}`, 5, 50, 20, "left", COLOR_ON);
     }
-
-    onInput(e, type) {
-        if (e === 'BTN1' && type === 'click') {
-            if (this.running) {
-                // Stop
-                this.running = false;
-            } else {
-                // Start
-                this.startTime = Date.now() - this.elapsed;
-                this.running = true;
-            }
-        }
-        if (e === 'BTN2' && type === 'click') {
-            if (this.running) {
-                this.laps.push(this.elapsed);
-            } else {
-                this.elapsed = 0;
-                this.laps = [];
-                this.running = false;
-            }
-        }
-        if (e === 'ENTER' && type === 'long_press') {
-            const data = `STOPWATCH EXPORT\nTotal: ${this.formatTime(this.elapsed)}\nLaps:\n${this.laps.map((l,i) => `${i+1}: ${this.formatTime(l)}`).join('\n')}`;
-            this.os.fs.save('stopwatch_log.txt', data);
-        }
-        if (e === 'BTN2' && type === 'long_press') this.os.switchMode('home');
-    }
+    onInput(e,type) { if(e==='BTN2') this.os.switchMode('home'); }
 }
 
-class WorkoutMode extends Mode {
-    constructor(os) {
-        super(os);
-        this.recording = false;
-        this.paused = false;
-        this.startTime = 0;
-        this.dataPoints = [];
-        this.distance = 0.0; // km
-        this.pace = "0:00";
-    }
-
-    update(dt) {
-        if (this.recording && !this.paused) {
-            // Simulate accumulating distance
-            if (this.os.sensors.gpsLocked) this.distance += 0.003; // approx 10km/h
-            
-            // Auto-pause check (simulated speed drop)
-            if (!this.os.sensors.gpsLocked && this.distance > 0.1) {
-                // this.paused = true; // Uncomment to test auto-pause
-            }
-
-            // Log data every second
-            if (Math.floor(Date.now() / 1000) > (this.lastLog || 0)) {
-                this.dataPoints.push({
-                    t: new Date().toISOString(),
-                    hr: this.os.sensors.heartRate,
-                    dist: this.distance.toFixed(3)
-                });
-                this.lastLog = Math.floor(Date.now() / 1000);
-            }
-        }
-    }
-
+class StopwatchMode extends Mode {
+    constructor(os) { super(os); this.t=0; this.run=false; }
+    update(dt) { if(this.run) this.t += dt; }
     draw(gfx) {
-        gfx.text("RUN RECORDER", SCREEN_W/2, 30, 16, "center");
-        
-        // Main Metrics
-        gfx.text(`${this.distance.toFixed(2)} km`, SCREEN_W/2, 100, 36, "center");
-        
-        const duration = this.recording ? (Date.now() - this.startTime) : 0;
-        const s = Math.floor(duration / 1000);
-        const timeStr = `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;
-        
-        gfx.text(timeStr, 60, 160, 24, "center");
-        gfx.text("TIME", 60, 180, 12, "center", COLOR_DIM);
-
-        gfx.text("5:30", 196, 160, 24, "center");
-        gfx.text("PACE", 196, 180, 12, "center", COLOR_DIM);
-
-        gfx.text(`HR: ${this.os.sensors.heartRate}`, SCREEN_W/2, 240, 18, "center");
-        
-        if (this.paused) gfx.text("!! PAUSED !!", SCREEN_W/2, 210, 14, "center", COLOR_ON);
-
-        if (!this.recording) {
-            gfx.text("BTN1 to START", SCREEN_W/2, 300, 14, "center");
-        } else {
-            gfx.text("BTN1: PAUSE", 10, 320, 12);
-            gfx.text("BTN2: STOP & SAVE", 10, 340, 12);
-        }
+        gfx.text("STOPWATCH", SCREEN_W/2, 18, 16, "center", COLOR_DIM);
+        gfx.text((this.t/1000).toFixed(2), SCREEN_W/2, 45, 24, "center");
     }
-
     onInput(e, type) {
-        if (type !== 'click') return;
-
-        if (e === 'BTN1') {
-            if (!this.recording) {
-                this.recording = true;
-                this.startTime = Date.now();
-                this.dataPoints = [];
-            } else {
-                this.paused = !this.paused;
-            }
-        }
-
-        if (e === 'BTN2' && this.recording) {
-            // Stop and Save
-            this.recording = false;
-            const csvContent = "Time,HR,Distance\n" + this.dataPoints.map(p => `${p.t},${p.hr},${p.dist}`).join('\n');
-            this.os.fs.save(`workout_${Date.now()}.csv`, csvContent);
-            this.os.switchMode('home');
-        } else if (e === 'BTN2') {
-            this.os.switchMode('menu');
-        }
+        if(type!=='click') return;
+        if(e==='BTN1') this.run = !this.run;
+        if(e==='BTN2') { this.run=false; this.t=0; this.os.switchMode('home'); }
     }
 }
 
 class InfoMode extends Mode {
     draw(gfx) {
-        gfx.text("DEVICE INFO", SCREEN_W/2, 30, 16, "center");
-        
-        let y = 80;
-        const addLine = (label, val) => {
-            gfx.text(label, 20, y, 12, "left", COLOR_DIM);
-            gfx.text(val, SCREEN_W - 20, y, 12, "right");
-            y += 30;
-        };
-
-        addLine("FIRMWARE", "v0.9.1 Beta");
-        addLine("BATTERY", `${this.os.sensors.battery}%`);
-        addLine("EST. LIFE", "14 Days");
-        addLine("TIMEZONE", "UTC+3");
-        addLine("STORAGE", "128MB Free");
-        
-        gfx.text("HOLD BTN2 to EXIT", SCREEN_W/2, 340, 12, "center");
+        gfx.text("INFO v0.3", SCREEN_W/2, 20, 16, "center");
+        gfx.text("BAT: 84%", SCREEN_W/2, 40, 16, "center");
+        gfx.text("MEM: 64KB", SCREEN_W/2, 60, 16, "center");
     }
-    onInput(e, type) {
-        if (e === 'BTN2') this.os.switchMode('home');
-    }
+    onInput(e,type) { if(e==='BTN2') this.os.switchMode('home'); }
 }
 
 class CompassMode extends Mode {
     draw(gfx) {
         const h = this.os.sensors.heading;
-        gfx.text("COMPASS", SCREEN_W/2, 30, 16, "center");
-        
-        // Numeric Heading
-        gfx.text(`${Math.floor(h)}°`, SCREEN_W/2, 100, 40, "center");
-        
-        // Cardinal
-        let card = "N";
-        if (h > 45 && h <= 135) card = "E";
-        if (h > 135 && h <= 225) card = "S";
-        if (h > 225 && h <= 315) card = "W";
-        gfx.text(card, SCREEN_W/2, 140, 20, "center", COLOR_DIM);
-
-        // Barometer / Alt
-        gfx.line(20, 200, SCREEN_W-20, 200);
-        gfx.text(`ALT: ${this.os.sensors.altitude}m`, 40, 240, 14);
-        gfx.text(`BARO: ${this.os.sensors.pressure}hPa`, 40, 270, 14);
+        gfx.text("COMPASS", SCREEN_W/2, 20, 16, "center");
+        gfx.text(`${Math.floor(h)}°`, SCREEN_W/2, 45, 24, "center");
     }
-    onInput(e, type) {
-        if (e === 'BTN2') this.os.switchMode('menu');
-    }
+    onInput(e,type) { if(e==='BTN2') this.os.switchMode('home'); }
 }
 
-// --- MAIN OPERATING SYSTEM ---
+// --- OS KERNEL ---
 
 class WatchOS {
     constructor() {
         this.gfx = new Graphics('display');
         this.audio = new AudioController();
-        this.fs = new FileSystem();
         this.sensors = new SimulatedSensors();
-        
-        this.settings = {
-            use24h: true,
-            soundEnabled: true
-        };
-
-        // Mode Registry
         this.modes = {
             home: new HomeMode(this),
             menu: new MenuMode(this),
@@ -540,72 +366,47 @@ class WatchOS {
             workout: new WorkoutMode(this),
             info: new InfoMode(this),
             compass: new CompassMode(this)
-            // Add Alarm/Timer modes similarly
         };
-        
         this.currentMode = this.modes.home;
-        
-        this.inputState = {
-            lastPressTime: 0,
-            pressedKey: null
-        };
-
-        this.lastInteraction = Date.now();
-        this.isScreenSaver = false;
-
+        this.inputState = { pressedKey: null, lastPressTime: 0 };
         this.initInput();
         this.loop();
     }
 
-    switchMode(modeName) {
-        if (this.modes[modeName]) {
+    switchMode(name) {
+        if(this.modes[name]) {
             this.currentMode.exit();
-            this.currentMode = this.modes[modeName];
+            this.currentMode = this.modes[name];
             this.currentMode.enter();
-            this.audio.beep(); // Feedback
+            this.audio.beep();
         }
     }
 
     handleInput(key, action) {
-        this.lastInteraction = Date.now();
-        this.isScreenSaver = false;
-
         const now = Date.now();
-        
-        // Visual Feedback
-        this.triggerButtonAnim(key);
+        this.triggerAnim(key);
 
-        // Input Logic (Short vs Long Press)
         if (action === 'down') {
             this.inputState.pressedKey = key;
             this.inputState.lastPressTime = now;
-            
-            // Continuous Hold (for menu access)
             if (key === 'ENTER') {
                  this.holdTimer = setTimeout(() => {
                      this.currentMode.onInput('ENTER', 'long_press');
-                     this.inputState.pressedKey = null; // Consume event
-                 }, 600); // 600ms for long press
+                     this.inputState.pressedKey = null;
+                 }, 500);
             }
-        } 
-        else if (action === 'up') {
+        } else if (action === 'up') {
             clearTimeout(this.holdTimer);
             if (this.inputState.pressedKey === key) {
-                const dur = now - this.inputState.lastPressTime;
-                // If we haven't consumed the key in a hold event
-                if (dur < 600) {
-                    this.currentMode.onInput(key, 'click');
-                }
+                this.currentMode.onInput(key, 'click');
             }
             this.inputState.pressedKey = null;
-        }
-        else if (action === 'rotate') {
-            this.currentMode.onInput(key === 'UP' ? 'UP' : 'DOWN', 'rotate');
-            this.audio.beep(); // Clicky crown sound
+        } else if (action === 'rotate') {
+            this.currentMode.onInput(key, 'rotate');
         }
     }
 
-    triggerButtonAnim(key) {
+    triggerAnim(key) {
         const map = { 'Z': 'phy-btn1', 'X': 'phy-btn2', 'UP': 'phy-crown', 'DOWN': 'phy-crown', 'ENTER': 'phy-crown' };
         const el = document.getElementById(map[key]);
         if(el) {
@@ -617,52 +418,24 @@ class WatchOS {
     initInput() {
         document.addEventListener('keydown', (e) => {
             if (e.repeat) return;
-            const map = { 
-                'ArrowUp': 'UP', 'ArrowDown': 'DOWN', 
-                'Enter': 'ENTER', 'z': 'BTN1', 'x': 'BTN2',
-                'Z': 'BTN1', 'X': 'BTN2' // Caps support
-            };
-            if (map[e.key]) {
-                if (e.key.includes('Arrow')) this.handleInput(map[e.key], 'rotate');
-                else this.handleInput(map[e.key], 'down');
-            }
+            const map = { 'ArrowUp':'UP', 'ArrowDown':'DOWN', 'Enter':'ENTER', 'z':'BTN1', 'x':'BTN2', 'Z':'BTN1', 'X':'BTN2' };
+            if (map[e.key]) this.handleInput(map[e.key], e.key.includes('Arrow') ? 'rotate' : 'down');
         });
-
         document.addEventListener('keyup', (e) => {
-            const map = { 'Enter': 'ENTER', 'z': 'BTN1', 'x': 'BTN2', 'Z': 'BTN1', 'X': 'BTN2' };
+            const map = { 'Enter':'ENTER', 'z':'BTN1', 'x':'BTN2', 'Z':'BTN1', 'X':'BTN2' };
             if (map[e.key]) this.handleInput(map[e.key], 'up');
         });
     }
 
     loop() {
-        // Logic Update
         this.currentMode.update(1000/FPS);
-
-        // Draw
         this.gfx.clear();
-
-        // Screensaver Logic
-        if (Date.now() - this.lastInteraction > 10000) {
-            this.isScreenSaver = true;
-        }
-
-        if (!this.isScreenSaver) {
-            this.currentMode.draw(this.gfx);
-        } else {
-            // Minimal screensaver
-            const d = new Date();
-            this.gfx.text(d.toLocaleTimeString(), SCREEN_W/2, SCREEN_H/2, 14, "center", COLOR_DIM);
-        }
-
+        this.currentMode.draw(this.gfx);
         requestAnimationFrame(() => this.loop());
     }
 }
 
-// Boot up
-window.onload = () => {
-    const os = new WatchOS();
-};
-
+window.onload = () => new WatchOS();
 </script>
 </body>
 </html>
