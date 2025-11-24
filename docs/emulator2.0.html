@@ -17,7 +17,7 @@
             --screen-off: #090909;
             --oled-on: #44ddff; /* Monochrome Blue/Cyan */
             --oled-dim: #6ebcd5;
-            --btn-active: #ff8800; /* Orange indicator */
+            --btn-active: #d56d0c; /* Orange indicator */
         }
 
         body {
@@ -59,7 +59,7 @@
             display: block; /* Removes baseline gap */
         }
 
-        /* Physical Buttons - Now on Right */
+        /* Physical Buttons - On Right */
         .btn {
             position: absolute;
             right: -3px; /* Low profile - sticks out very little */
@@ -395,7 +395,7 @@ class MenuMode extends Mode {
         Utils.drawText(ctx, '> MENU <', 64, 2, 'center', CONFIG.COLORS.DIM);
         
         // List View
-        const startY = 16;
+        const startY = 9;
         const h = 12;
         
         // Show 3 items centered around idx
