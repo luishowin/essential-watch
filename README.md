@@ -1,4 +1,4 @@
-# trek_watch_f91
+# trek_91_watch
 A custom watch emulation 
 
 Built on Vanilla JavaScript and HTML5 Canvas.
@@ -16,7 +16,7 @@ Crown Press: Enter
 BTN 1 (Action/Light): Z key
 BTN 2 (Back/Cancel): X key
 
-trek_watchr.html
+trek_watch.html
 20 Nov, 02:12
 
 
