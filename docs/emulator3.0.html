@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Beben Watch OS — Precision Emulator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #1A1C1E;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* Hardware enclosure */
+        .watch-chassis {
+            background: #2C2F33;
+            padding: 28px 24px 28px 24px;
+            border-radius: 48px;
+            box-shadow: 
+                0 20px 35px -12px rgba(0,0,0,0.5),
+                inset 0 1px 0 rgba(255,255,255,0.08);
+            position: relative;
+            border: 1px solid #1E1F22;
+        }
+
+        /* Display glass (simulated OLED) */
+        .display-container {
+            background: #000;
+            border-radius: 24px;
+            padding: 12px;
+            box-shadow: inset 0 0 8px rgba(0,0,0,0.6), 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+            width: 336px;
+            height: 336px;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            cursor: pointer;
+        }
+
+        /* Right side buttons + crown (hardware layout) */
+        .hardware-panel {
+            position: absolute;
+            right: -12px;
+            top: 0;
+            bottom: 0;
+            width: 32px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 28px;
+            align-items: flex-end;
+        }
+
+        .btn {
+            background: #3A3F44;
+            width: 28px;
+            height: 52px;
+            border-radius: 14px 4px 4px 14px;
+            box-shadow: -2px 0 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+            transition: all 0.05s linear;
+        }
+
+        .btn:active {
+            transform: scaleX(0.92);
+            background: #2E3236;
+        }
+
+        /* rotary crown (encoder style) */
+        .crown-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+        }
+        .crown-shaft {
+            background: #5A5F66;
+            width: 22px;
+            height: 48px;
+            border-radius: 12px 4px 4px 12px;
+            box-shadow: -2px 0 6px rgba(0,0,0,0.4);
+            position: relative;
+            background: linear-gradient(135deg, #6F767D, #44494E);
+        }
+        .crown-press-area {
+            position: absolute;
+            right: 0;
+            top: -60px;
+            width: 28px;
+            height: 48px;
+            background: transparent;
+            cursor: pointer;
+        }
+        .crown-ticks {
+            position: absolute;
+            right: -2px;
+            top: 6px;
+            width: 8px;
+            height: 36px;
+            background: repeating-linear-gradient(180deg, #222, #222 4px, #888 4px, #888 8px);
+            border-radius: 2px;
+        }
+
+        /* keyboard hints */
+        .key-hints {
+            margin-top: 32px;
+            background: #121212CC;
+            backdrop-filter: blur(12px);
+            padding: 10px 16px;
+            border-radius: 48px;
+            font-size: 12px;
+            font-family: monospace;
+            color: #C0C4C9;
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+            justify-content: center;
+            border: 1px solid #2C2F33;
+        }
+        .key {
+            background: #2A2D32;
+            padding: 4px 10px;
+            border-radius: 32px;
+            font-weight: bold;
+            color: #E2E6EA;
+            letter-spacing: 0.5px;
+        }
+
+        /* audio permission hint */
+        .audio-note {
+            font-size: 10px;
+            text-align: center;
+            margin-top: 16px;
+            color: #7F8C8D;
+            font-family: monospace;
+        }
+
+        @keyframes pulse-fb {
+            0% { opacity: 0.8; transform: scale(1);}
+            100% { opacity: 0; transform: scale(1.3);}
+        }
+        .haptic-overlay {
+            position: fixed;
+            pointer-events: none;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: radial-gradient(circle, rgba(231,76,60,0.1) 0%, rgba(0,0,0,0) 80%);
+            opacity: 0;
+            transition: opacity 0.02s;
+        }
+    </style>
+</head>
+<body>
+<div style="position: relative;">
+    <div class="watch-chassis">
+        <div class="display-container">
+            <canvas id="watchCanvas" width="280" height="280" style="width:280px; height:280px;"></canvas>
+        </div>
+        <div class="hardware-panel">
+            <div class="btn" id="btnA"></div>
+            <div class="crown-group">
+                <div class="crown-shaft">
+                    <div class="crown-ticks"></div>
+                </div>
+                <div style="height: 8px;"></div>
+            </div>
+            <div class="btn" id="btnB"></div>
+        </div>
+    </div>
+    <div class="key-hints">
+        <span><span class="key">↑/↓</span> Crown rotate</span>
+        <span><span class="key">Enter</span> Crown press</span>
+        <span><span class="key">Backspace</span> Crown long press</span>
+        <span><span class="key">A</span> Button A</span>
+        <span><span class="key">B</span> Button B</span>
+        <span><span class="key">D</span> Double press demo</span>
+    </div>
+    <div class="audio-note">⚡ Audio feedback enabled (click to activate)</div>
+</div>
+<div id="hapticFx" class="haptic-overlay"></div>
+
+<script>
+    // ============================================================
+    // Beben Watch OS – Full specification implementation
+    // Hardware: 2 Buttons + Crown (Encoder + Push)
+    // Timing thresholds, haptics, audio, visual rules
+    // ============================================================
+
+    // ------------------- AUDIO CONTROLLER -----------------------
+    class AudioFX {
+        constructor() {
+            this.ctx = null;
+            this.ready = false;
+            this.initOnFirstUserInteraction();
+        }
+        initOnFirstUserInteraction() {
+            const initAudio = () => {
+                if (this.ctx) return;
+                this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                this.ready = true;
+                document.removeEventListener('click', initAudio);
+                document.removeEventListener('keydown', initAudio);
+            };
+            document.addEventListener('click', initAudio);
+            document.addEventListener('keydown', initAudio);
+        }
+        play(type) {
+            if (!this.ready || !this.ctx) return;
+            const now = this.ctx.currentTime;
+            const gainNode = this.ctx.createGain();
+            gainNode.connect(this.ctx.destination);
+            const osc = this.ctx.createOscillator();
+            osc.connect(gainNode);
+            gainNode.gain.setValueAtTime(0.12, now);
+            gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.08);
+            switch(type) {
+                case 'scrollTick':
+                    osc.frequency.value = 2100;
+                    osc.type = 'sine';
+                    gainNode.gain.setValueAtTime(0.05, now);
+                    osc.start(now);
+                    osc.stop(now + 0.018);
+                    break;
+                case 'select':
+                    osc.frequency.value = 1800;
+                    osc.type = 'sine';
+                    osc.start(now);
+                    osc.stop(now + 0.045);
+                    break;
+                case 'back':
+                    osc.frequency.value = 980;
+                    osc.type = 'triangle';
+                    osc.start(now);
+                    osc.stop(now + 0.055);
+                    break;
+                case 'error':
+                    osc.frequency.value = 440;
+                    osc.type = 'square';
+                    gainNode.gain.setValueAtTime(0.09, now);
+                    osc.start(now);
+                    osc.stop(now + 0.07);
+                    break;
+                case 'notification':
+                    osc.frequency.value = 2400;
+                    osc.type = 'sine';
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                    setTimeout(() => {
+                        if(this.ctx) {
+                            const osc2 = this.ctx.createOscillator();
+                            const g2 = this.ctx.createGain();
+                            osc2.connect(g2);
+                            g2.connect(this.ctx.destination);
+                            osc2.frequency.value = 2800;
+                            g2.gain.setValueAtTime(0.08, now+0.08);
+                            g2.gain.exponentialRampToValueAtTime(0.0001, now+0.15);
+                            osc2.start(now+0.08);
+                            osc2.stop(now+0.16);
+                        }
+                    }, 10);
+                    break;
+                default: break;
+            }
+        }
+        haptic(pattern) {
+            const overlay = document.getElementById('hapticFx');
+            if (!overlay) return;
+            if (pattern === 'lightTick') {
+                overlay.style.opacity = '0.2';
+                setTimeout(() => overlay.style.opacity = '0', 35);
+            } else if (pattern === 'shortPulse') {
+                overlay.style.opacity = '0.4';
+                setTimeout(() => overlay.style.opacity = '0', 45);
+            } else if (pattern === 'doublePulse') {
+                overlay.style.opacity = '0.5';
+                setTimeout(() => { overlay.style.opacity = '0.2'; setTimeout(() => overlay.style.opacity = '0', 40); }, 30);
+            }
+        }
+    }
+
+    // ------------------- VISUALS -------------------------------
+    const canvas = document.getElementById('watchCanvas');
+    const ctx = canvas.getContext('2d');
+    const W = 280, H = 280;
+    const COLOR_BG = "#000000";
+    const COLOR_TEXT = "#E5E9F0";
+    const COLOR_HIGH = "#E71D36";   // Signal Red accent
+    const COLOR_DIM = "#4A4E56";
+
+    // ---------- INPUT TIMING & STATE MACHINE ----------------
+    const DEBOUNCE_MS = 10;
+    const LONG_PRESS_MS = 500;
+    const DOUBLE_PRESS_GAP_MS = 300;
+
+    class InputProcessor {
+        constructor(onRotate, onPress, onLongPress, onDoublePress) {
+            this.onRotate = onRotate;
+            this.onPress = onPress;
+            this.onLongPress = onLongPress;
+            this.onDoublePress = onDoublePress;
+            this.lastPressTime = 0;
+            this.pendingPressTimer = null;
+            this.pendingLongPress = null;
+            this.lastKey = null;
+            this.isLongPressTriggered = false;
+        }
+        handleKeyDown(key) {
+            if (key === 'CW' || key === 'CCW') return;
+            const now = Date.now();
+            this.isLongPressTriggered = false;
+            if (this.pendingLongPress) clearTimeout(this.pendingLongPress);
+            this.pendingLongPress = setTimeout(() => {
+                if (this.lastKey === key) {
+                    this.isLongPressTriggered = true;
+                    this.onLongPress(key);
+                    this.clearPressState();
+                }
+            }, LONG_PRESS_MS);
+            this.lastKey = key;
+            // double press detection logic
+            if (this.lastPressTime && (now - this.lastPressTime) <= DOUBLE_PRESS_GAP_MS && this.lastKey === key) {
+                // double press
+                if (this.pendingPressTimer) clearTimeout(this.pendingPressTimer);
+                if (this.pendingLongPress) clearTimeout(this.pendingLongPress);
+                this.onDoublePress(key);
+                this.clearPressState();
+            } else {
+                this.lastPressTime = now;
+                if (this.pendingPressTimer) clearTimeout(this.pendingPressTimer);
+                this.pendingPressTimer = setTimeout(() => {
+                    if (!this.isLongPressTriggered && this.lastKey === key) {
+                        this.onPress(key);
+                    }
+                    this.clearPressState();
+                }, DOUBLE_PRESS_GAP_MS);
+            }
+        }
+        handleKeyUp() {
+            // not used for edge (just reset if needed)
+        }
+        clearPressState() {
+            if (this.pendingPressTimer) clearTimeout(this.pendingPressTimer);
+            if (this.pendingLongPress) clearTimeout(this.pendingLongPress);
+            this.pendingPressTimer = null;
+            this.pendingLongPress = null;
+            this.lastKey = null;
+            this.lastPressTime = 0;
+        }
+        rotate(dir) {
+            if (this.pendingLongPress) return; // press-overrides rotation
+            this.onRotate(dir);
+        }
+    }
+
+    // ------------- APP STATE & MODELS -------------------------
+    let idleTimeout = null;
+    let currentMode = 'watchface'; // watchface, menu, app, modal
+    let selectedIndex = 0;
+    let menuItems = ['Time', 'Alarms', 'Stopwatch', 'Compass', 'Health', 'Settings'];
+    let activeApp = null; // Stores current function context
+    let appData = {
+        stopwatch: { running: false, elapsedMs: 0, lastTick: 0 },
+        alarms: { list: [{ hour:7, min:0, enabled:true }, { hour:9, min:30, enabled:false }], editIdx: 0, editPart: 'hour' },
+        compass: { heading: 142 },
+        health: { hr: 72, steps: 8342 },
+        settings: { brightness: 80, theme: 'dark' }
+    };
+    let lastRender = 0;
+
+    // Helper: idle timeout -> watchface
+    function resetIdleTimer() {
+        if (idleTimeout) clearTimeout(idleTimeout);
+        idleTimeout = setTimeout(() => {
+            if (currentMode !== 'watchface') {
+                currentMode = 'watchface';
+                selectedIndex = 0;
+                activeApp = null;
+                renderScreen();
+                audioFX.play('back');
+                audioFX.haptic('shortPulse');
+            }
+        }, 12000); // 12 seconds idle
+    }
+
+    // crown rotation with acceleration curve (1 to up to 5 steps)
+    let lastRotateTime = 0;
+    let rotateAccum = 0;
+    function handleRotate(dir) {
+        const now = Date.now();
+        let step = 1;
+        if (now - lastRotateTime < 80) {
+            rotateAccum = Math.min(rotateAccum + 0.7, 5);
+            step = Math.floor(1 + rotateAccum);
+        } else {
+            rotateAccum = 1;
+            step = 1;
+        }
+        lastRotateTime = now;
+        for (let i=0; i<step; i++) {
+            if (currentMode === 'watchface') {
+                // optional widgets cycle (extra feature: cycle through metrics)
+                // ignore for now keeps minimal but we can show small data change
+                break;
+            } else if (currentMode === 'menu') {
+                let delta = (dir === 'CW') ? 1 : -1;
+                selectedIndex = (selectedIndex + delta + menuItems.length) % menuItems.length;
+                audioFX.play('scrollTick');
+                audioFX.haptic('lightTick');
+            } else if (currentMode === 'app' && activeApp) {
+                handleAppRotate(dir);
+                audioFX.play('scrollTick');
+                audioFX.haptic('lightTick');
+            }
+        }
+        renderScreen();
+        resetIdleTimer();
+    }
+
+    function handleAppRotate(dir) {
+        if (activeApp === 'stopwatch') return;
+        if (activeApp === 'alarms') {
+            let delta = (dir === 'CW') ? 1 : -1;
+            if (appData.alarms.editPart === 'hour') {
+                appData.alarms.list[appData.alarms.editIdx].hour = (appData.alarms.list[appData.alarms.editIdx].hour + delta + 24) % 24;
+            } else {
+                appData.alarms.list[appData.alarms.editIdx].min = (appData.alarms.list[appData.alarms.editIdx].min + delta + 60) % 60;
+            }
+        }
+        if (activeApp === 'health') {
+            // just mock
+        }
+        if (activeApp === 'compass') {
+            let delta = (dir === 'CW') ? 5 : -5;
+            appData.compass.heading = (appData.compass.heading + delta + 360) % 360;
+        }
+        if (activeApp === 'settings') {
+            let delta = (dir === 'CW') ? 5 : -5;
+            appData.settings.brightness = Math.min(100, Math.max(20, appData.settings.brightness + delta));
+        }
+    }
+
+    function handlePress(key) {
+        resetIdleTimer();
+        if (key === 'CROWN_PRESS') {
+            audioFX.play('select');
+            audioFX.haptic('shortPulse');
+            if (currentMode === 'watchface') {
+                currentMode = 'menu';
+                selectedIndex = 0;
+            } 
+            else if (currentMode === 'menu') {
+                const selectedApp = menuItems[selectedIndex].toLowerCase();
+                activeApp = selectedApp;
+                currentMode = 'app';
+                if (selectedApp === 'alarms') appData.alarms.editIdx = 0;
+            }
+            else if (currentMode === 'app') {
+                if (activeApp === 'stopwatch') {
+                    appData.stopwatch.running = !appData.stopwatch.running;
+                    if (appData.stopwatch.running) appData.stopwatch.lastTick = performance.now();
+                }
+                else if (activeApp === 'alarms') {
+                    if (appData.alarms.editPart === 'hour') appData.alarms.editPart = 'min';
+                    else if (appData.alarms.editPart === 'min') {
+                        appData.alarms.editPart = 'hour';
+                        // return to menu? but better stay in edit
+                    }
+                }
+                else if (activeApp === 'settings') {}
+            }
+            renderScreen();
+        }
+        else if (key === 'BTN_A') {
+            audioFX.play('select');
+            audioFX.haptic('shortPulse');
+            // quick action: context-aware
+            if (currentMode === 'watchface') {
+                // show notification preview
+                currentMode = 'modal';
+                setTimeout(() => { if(currentMode === 'modal') currentMode = 'watchface'; renderScreen(); resetIdleTimer();}, 1800);
+            } 
+            else if (currentMode === 'menu') {
+                selectedIndex = Math.max(0, selectedIndex - 2);
+                renderScreen();
+            }
+            else if (currentMode === 'app' && activeApp === 'stopwatch') {
+                if (appData.stopwatch.running === false) appData.stopwatch.elapsedMs = 0;
+            }
+            renderScreen();
+        }
+        else if (key === 'BTN_B') {
+            audioFX.play('back');
+            audioFX.haptic('shortPulse');
+            if (currentMode === 'menu' || currentMode === 'app') {
+                if(currentMode === 'app') activeApp = null;
+                currentMode = 'watchface';
+                selectedIndex = 0;
+            } else if (currentMode === 'watchface') {
+                // quick tools hint
+                currentMode = 'modal';
+                setTimeout(() => { if(currentMode === 'modal') currentMode = 'watchface'; renderScreen(); resetIdleTimer();}, 1000);
+            }
+            renderScreen();
+        }
+    }
+
+    function handleLongPress(key) {
+        resetIdleTimer();
+        audioFX.play('back');
+        audioFX.haptic('doublePulse');
+        if (key === 'CROWN_PRESS') {
+            if (currentMode !== 'watchface') {
+                activeApp = null;
+                currentMode = 'watchface';
+            } else {
+                // custom action on watchface: start stopwatch quick
+                activeApp = 'stopwatch';
+                currentMode = 'app';
+            }
+            renderScreen();
+        } else if (key === 'BTN_B') {
+            if(currentMode !== 'watchface') {
+                activeApp = null;
+                currentMode = 'watchface';
+                renderScreen();
+            }
+        }
+    }
+
+    function handleDoublePress(key) {
+        resetIdleTimer();
+        audioFX.play('notification');
+        audioFX.haptic('doublePulse');
+        if (key === 'BTN_A') {
+            // Contextual shortcut: toggle flashlight simulation on watchface
+            if (currentMode === 'watchface') {
+                ctx.fillStyle = "#FFD966";
+                ctx.fillRect(0,0,W,H);
+                setTimeout(() => renderScreen(), 200);
+            }
+        } else if (key === 'BTN_B') {
+            if (currentMode === 'watchface') {
+                // secondary shortcut: launch stopwatch
+                activeApp = 'stopwatch';
+                currentMode = 'app';
+                renderScreen();
+            }
+        } else if (key === 'CROWN_PRESS') {
+            // double press crown: lock screen simulation (just feedback)
+        }
+    }
+
+    // drawing routines with high contrast, monospace
+    function drawWatchface() {
+        ctx.fillStyle = COLOR_BG;
+        ctx.fillRect(0,0,W,H);
+        ctx.font = "36px 'JetBrains Mono', monospace";
+        ctx.fillStyle = COLOR_TEXT;
+        ctx.textAlign = "center";
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        ctx.fillText(timeStr, W/2, 110);
+        ctx.font = "16px monospace";
+        ctx.fillStyle = COLOR_DIM;
+        const dateStr = now.toLocaleDateString([], {month:'short', day:'numeric'});
+        ctx.fillText(dateStr, W/2, 160);
+        ctx.font = "12px monospace";
+        ctx.fillStyle = COLOR_HIGH;
+        ctx.fillText("BEBEN OS", W/2, 210);
+        ctx.fillStyle = COLOR_DIM;
+        ctx.fillText("press ⏺ crown", W/2, 250);
+    }
+
+    function drawMenu() {
+        ctx.fillStyle = COLOR_BG;
+        ctx.fillRect(0,0,W,H);
+        const visible = 4;
+        let start = Math.max(0, selectedIndex - 1);
+        for(let i=0; i<visible; i++) {
+            let idx = start + i;
+            if(idx >= menuItems.length) break;
+            let y = 60 + i*42;
+            ctx.font = (idx === selectedIndex) ? "bold 20px 'JetBrains Mono'" : "18px monospace";
+            ctx.fillStyle = (idx === selectedIndex) ? COLOR_HIGH : COLOR_TEXT;
+            ctx.textAlign = "left";
+            let prefix = (idx === selectedIndex) ? "▶ " : "   ";
+            ctx.fillText(prefix + menuItems[idx], 40, y);
+        }
+        ctx.font = "12px monospace";
+        ctx.fillStyle = COLOR_DIM;
+        ctx.fillText("▲/▼ rotate · ⏺ select", W/2, 265);
+    }
+
+    function drawApp() {
+        ctx.fillStyle = COLOR_BG;
+        ctx.fillRect(0,0,W,H);
+        ctx.font = "bold 18px monospace";
+        ctx.fillStyle = COLOR_HIGH;
+        ctx.textAlign = "center";
+        ctx.fillText(activeApp.toUpperCase(), W/2, 45);
+        ctx.font = "16px monospace";
+        ctx.fillStyle = COLOR_TEXT;
+        ctx.textAlign = "left";
+        if(activeApp === 'stopwatch') {
+            let elapsed = appData.stopwatch.elapsedMs;
+            let seconds = Math.floor(elapsed / 1000);
+            let cent = Math.floor((elapsed % 1000)/10);
+            ctx.font = "32px monospace";
+            ctx.fillStyle = COLOR_HIGH;
+            ctx.fillText(`${seconds}.${cent.toString().padStart(2,'0')}`, W/2-60, 140);
+            ctx.font = "14px monospace";
+            ctx.fillStyle = COLOR_DIM;
+            ctx.fillText(appData.stopwatch.running ? "RUNNING · A = reset" : "PAUSED · A = reset", 40, 200);
+            ctx.fillText("B = back", 40, 240);
+        } 
+        else if(activeApp === 'alarms') {
+            let alarm = appData.alarms.list[0];
+            ctx.fillStyle = COLOR_TEXT;
+            ctx.fillText(`Alarm: ${alarm.hour.toString().padStart(2,'0')}:${alarm.min.toString().padStart(2,'0')}`, 40, 120);
+            ctx.fillStyle = (appData.alarms.editPart === 'hour') ? COLOR_HIGH : COLOR_DIM;
+            ctx.fillText(`[EDIT HOUR]`, 40, 170);
+            ctx.fillStyle = (appData.alarms.editPart === 'min') ? COLOR_HIGH : COLOR_DIM;
+            ctx.fillText(`[EDIT MIN]`, 40, 210);
+        }
+        else if(activeApp === 'compass') {
+            ctx.fillStyle = COLOR_TEXT;
+            ctx.font = "42px monospace";
+            ctx.fillText(`${appData.compass.heading}°`, W/2-40, 150);
+        }
+        else if(activeApp === 'health') {
+            ctx.fillText(`Heart: ${appData.health.hr} bpm`, 40, 130);
+            ctx.fillText(`Steps: ${appData.health.steps}`, 40, 180);
+        }
+        else if(activeApp === 'settings') {
+            ctx.fillText(`Brightness: ${appData.settings.brightness}%`, 40, 140);
+            ctx.fillText(`Rotate to adjust`, 40, 200);
+        } else {
+            ctx.fillText("demo function", 40, 130);
+        }
+        ctx.font = "11px monospace";
+        ctx.fillStyle = "#6C707A";
+        ctx.fillText("hold crown → exit", 40, 260);
+    }
+
+    function drawModal(message) {
+        ctx.fillStyle = COLOR_BG;
+        ctx.fillRect(0,0,W,H);
+        ctx.fillStyle = COLOR_HIGH;
+        ctx.font = "bold 16px monospace";
+        ctx.textAlign = "center";
+        ctx.fillText("⚡ NOTIFICATION", W/2, 110);
+        ctx.font = "14px monospace";
+        ctx.fillStyle = COLOR_TEXT;
+        ctx.fillText("Quick action", W/2, 170);
+    }
+
+    function renderScreen() {
+        if (currentMode === 'watchface') drawWatchface();
+        else if (currentMode === 'menu') drawMenu();
+        else if (currentMode === 'app') drawApp();
+        else if (currentMode === 'modal') drawModal();
+    }
+
+    // update stopwatch timer
+    let lastStopwatchUpdate = 0;
+    function updateTimers() {
+        if (activeApp === 'stopwatch' && appData.stopwatch.running) {
+            const nowPerf = performance.now();
+            if (appData.stopwatch.lastTick) {
+                const delta = Math.min(100, nowPerf - appData.stopwatch.lastTick);
+                appData.stopwatch.elapsedMs += delta;
+            }
+            appData.stopwatch.lastTick = nowPerf;
+            renderScreen();
+        }
+        requestAnimationFrame(updateTimers);
+    }
+
+    // ---- Hardware simulation & bindings ----------
+    const audioFX = new AudioFX();
+    const inputProc = new InputProcessor(
+        (dir) => handleRotate(dir),
+        (key) => handlePress(key),
+        (key) => handleLongPress(key),
+        (key) => handleDoublePress(key)
+    );
+    function mapKeyToHardware(key) {
+        if (key === 'ArrowUp') inputProc.rotate('CCW');
+        else if (key === 'ArrowDown') inputProc.rotate('CW');
+        else if (key === 'Enter') inputProc.handleKeyDown('CROWN_PRESS');
+        else if (key === 'Backspace') handleLongPress('CROWN_PRESS');
+        else if (key === 'a' || key === 'A') inputProc.handleKeyDown('BTN_A');
+        else if (key === 'b' || key === 'B') inputProc.handleKeyDown('BTN_B');
+        else if (key === 'd' || key === 'D') handleDoublePress('BTN_A');
+    }
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowUp' || e.key === 'ArrowDown') e.preventDefault();
+        if (e.key === 'Enter' || e.key === 'Backspace') e.preventDefault();
+        mapKeyToHardware(e.key);
+        renderScreen();
+    });
+    // Additional: click handler for hardware mock canvas
+    canvas.addEventListener('click', () => inputProc.handleKeyDown('CROWN_PRESS'));
+    
+    // init
+    renderScreen();
+    resetIdleTimer();
+    updateTimers();
+
+    // periodic compass drift & health update
+    setInterval(() => {
+        appData.compass.heading = (appData.compass.heading + 1) % 360;
+        appData.health.hr = 65 + Math.floor(Math.random() * 15);
+        if(currentMode === 'app' && activeApp ==='compass') renderScreen();
+        if(currentMode === 'app' && activeApp ==='health') renderScreen();
+    }, 2800);
+</script>
+
+</body>
+</html>
