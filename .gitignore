@@ -1,0 +1,6 @@
+# Session tooling artifacts
+.zcode/
+
+# OS noise
+.DS_Store
+Thumbs.db

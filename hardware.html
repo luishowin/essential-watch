@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hardware · Essential Watch</title>
+  <meta name="description" content="Digest of the Essential Watch hardware specification, draft v6: monochrome OLED, CNC aluminum case, contactless input, 10 ATM, 30 day battery target.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/site.css">
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <a class="nav-brand" href="index.html"><span class="dot"></span>Essential Watch</a>
+      <div class="nav-links">
+        <a href="index.html">Overview</a>
+        <a href="philosophy.html">Philosophy</a>
+        <a href="hardware.html" aria-current="page">Hardware</a>
+        <a href="emulator.html">Emulator</a>
+        <a href="journal.html">Journal</a>
+      </div>
+      <button class="nav-toggle" aria-expanded="false" aria-controls="nav-panel" aria-label="Open menu">
+        <span></span><span></span>
+      </button>
+    </div>
+    <div class="nav-panel" id="nav-panel" hidden>
+      <a href="index.html">Overview</a>
+      <a href="philosophy.html">Philosophy</a>
+      <a href="hardware.html" aria-current="page">Hardware</a>
+      <a href="emulator.html">Emulator</a>
+      <a href="journal.html">Journal</a>
+    </div>
+  </nav>
+
+  <main>
+
+    <header class="hero container">
+      <span class="kicker reveal">The hardware · spec digest</span>
+      <h1 class="display reveal">Drafted in<br>the open.</h1>
+      <p class="lede reveal">The single source of truth is the markdown specification living beside this site. This page is the working digest: what is decided, and what is still deliberately undecided.</p>
+      <p class="mono reveal" style="margin-top: 20px">SPEC DRAFT V6 · UPDATED 2026-09-06 · SUPERSEDES V5</p>
+    </header>
+
+    <section class="section">
+      <div class="container">
+        <div class="spec-block reveal">
+          <h3><span class="index">01</span>Chassis &amp; mechanical</h3>
+          <dl class="spec-rows">
+            <div class="spec-row">
+              <dt>size / mass</dt>
+              <dd>42 × 36 × 9 mm target, 30 g ceiling, provisional until real CAD mass properties exist<span class="note">Reference: F-91W is 37.5 × 34.5 × 8.5 mm at 21 g, in resin with no radio, sensors, or haptics.</span></dd>
+            </div>
+            <div class="spec-row">
+              <dt>material</dt>
+              <dd>CNC-machined aluminum housing, tempered glass front, removable back cover on 4× Torx screws with gasket seal</dd>
+            </div>
+            <div class="spec-row">
+              <dt>water / temp</dt>
+              <dd>10 ATM (100 m) target, -20 °C to 50 °C operating range</dd>
+            </div>
+            <div class="spec-row">
+              <dt>finishes</dt>
+              <dd>Natural grey anodize and jet black hardcoat anodize or PVD, sample swatches pending</dd>
+            </div>
+            <div class="spec-row">
+              <dt>strap</dt>
+              <dd>Quick-release 20 mm proposed, metal link bracelet default, width confirmed against final case CAD</dd>
+            </div>
+            <div class="spec-row">
+              <dt>charging</dt>
+              <dd>Magnetic spring-loaded pogo pins integrated into one bracelet link, no in-case port, puck ends in a female USB-C receptacle</dd>
+            </div>
+          </dl>
+        </div>
+
+        <div class="spec-block reveal">
+          <h3><span class="index">02</span>Display</h3>
+          <dl class="spec-rows">
+            <div class="spec-row">
+              <dt>panel</dt>
+              <dd>~1" rectangular monochrome OLED, single emitter color, dark-background UI<span class="note">Changed in v6 from e-paper. Panel selection, interface, and driver IC are open item 12.</span></dd>
+            </div>
+            <div class="spec-row">
+              <dt>mounting</dt>
+              <dd>Rigid internal carrier, soft gasket mount inside the case for impact isolation, drop-test validation pending</dd>
+            </div>
+            <div class="spec-row">
+              <dt>update policy</dt>
+              <dd>Frame-addressable, no ghosting or refresh cycles. Static faces redraw on state change only, so the policy is a power decision now, not a panel limit</dd>
+            </div>
+            <div class="spec-row">
+              <dt>daylight</dt>
+              <dd>Matte AR stack on the glass, maximum-contrast 1-bit UI, peak-brightness burst on wrist-raise</dd>
+            </div>
+            <div class="spec-row">
+              <dt>burn-in</dt>
+              <dd>Dim always-on state, brighter raise state, occasional pixel-shift for long-lived static elements</dd>
+            </div>
+          </dl>
+        </div>
+
+        <div class="spec-block reveal">
+          <h3><span class="index">03</span>Compute</h3>
+          <dl class="spec-rows">
+            <div class="spec-row">
+              <dt>mcu</dt>
+              <dd>Nordic nRF52840</dd>
+            </div>
+            <div class="spec-row">
+              <dt>storage</dt>
+              <dd>1 MB onboard flash, roughly 400 to 470 KB real single-image budget after dual-bank OTA overhead</dd>
+            </div>
+          </dl>
+        </div>
+
+        <div class="spec-block reveal">
+          <h3><span class="index">04</span>Sensors</h3>
+          <dl class="spec-rows">
+            <div class="spec-row">
+              <dt>imu</dt>
+              <dd>6-axis accelerometer + gyroscope, candidate for tilt-to-wake with threshold tuning against false triggers</dd>
+            </div>
+            <div class="spec-row">
+              <dt>heart rate / spo2</dt>
+              <dd>Optical sensor, tap-to-measure or logging mode, exposed over standard BLE GATT services for third-party app compatibility</dd>
+            </div>
+            <div class="spec-row">
+              <dt>excluded</dt>
+              <dd>Barometer, altimeter, magnetometer. Out until they pay rent.</dd>
+            </div>
+          </dl>
+        </div>
+
+        <div class="spec-block reveal">
+          <h3><span class="index">05</span>Input</h3>
+          <dl class="spec-rows">
+            <div class="spec-row">
+              <dt>layout</dt>
+              <dd>Two pill buttons with one rotary encoder crown between them, all contactless: Hall-effect sensing for buttons, magnetic rotary sensing for the crown<span class="note">No shaft or actuator penetrates the waterproof cavity.</span></dd>
+            </div>
+            <div class="spec-row">
+              <dt>gestures</dt>
+              <dd>Single, double, and hold presses per button; rotate, click, and hold on the crown. Each paired with an LRA tap or a chime.</dd>
+            </div>
+            <div class="spec-row">
+              <dt>mode cycle</dt>
+              <dd>Date &amp; Time → Stopwatch → Countdown / Interval → Alarms → HR / SpO2 → back. Set Time lives outside the loop, on a long press from the home mode.</dd>
+            </div>
+          </dl>
+        </div>
+
+        <div class="spec-block reveal">
+          <h3><span class="index">06</span>Haptics &amp; audio</h3>
+          <dl class="spec-rows">
+            <div class="spec-row">
+              <dt>haptics</dt>
+              <dd>LRA with closed-loop driver, feel benchmarked against the Apple Watch Taptic Engine</dd>
+            </div>
+            <div class="spec-row">
+              <dt>audio</dt>
+              <dd>Piezo buzzer with tone-sequencer chimes suited to its narrowband resonance, placement under review away from the back panel</dd>
+            </div>
+            <div class="spec-row">
+              <dt>silent mode</dt>
+              <dd>Global haptic-only mode under consideration</dd>
+            </div>
+          </dl>
+        </div>
+
+        <div class="spec-block reveal">
+          <h3><span class="index">07</span>Timing</h3>
+          <dl class="spec-rows">
+            <div class="spec-row">
+              <dt>resolution</dt>
+              <dd>True 1/100 s via hardware timer, edge-triggered interrupts latching a free-running counter, no polling, no debounce needed</dd>
+            </div>
+            <div class="spec-row">
+              <dt>display</dt>
+              <dd>Live subsecond digits are possible on OLED. Live versus reveal-on-lap is now a taste and power choice, open item 11.</dd>
+            </div>
+          </dl>
+        </div>
+
+        <div class="spec-block reveal">
+          <h3><span class="index">08</span>Firmware</h3>
+          <dl class="spec-rows">
+            <div class="spec-row">
+              <dt>watchfaces</dt>
+              <dd>Custom watchface UI compiled into a single firmware image, with SDK templates and a web-based build tool planned</dd>
+            </div>
+            <div class="spec-row">
+              <dt>updates</dt>
+              <dd>Distribution over BLE Secure DFU via Web Bluetooth, OS-agnostic, with internal SWD recovery pads as the physical failsafe</dd>
+            </div>
+          </dl>
+        </div>
+
+        <div class="spec-block reveal">
+          <h3><span class="index">09</span>Power</h3>
+          <dl class="spec-rows">
+            <div class="spec-row">
+              <dt>target</dt>
+              <dd>30 days including active notification serving, room-temperature baseline<span class="note">v6 caveat: budget to be re-derived for the emissive panel. Runtime now hinges on the always-on dim level and raise-to-bright frequency.</span></dd>
+            </div>
+            <div class="spec-row">
+              <dt>cells</dt>
+              <dd>CR2032 for bench bring-up only, non-rechargeable, never on the charge circuit. Production: rechargeable thin LiPo pouch shaped to the case cavity.</dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="section-head">
+          <span class="kicker reveal">Deliberately undecided</span>
+          <h2 class="headline reveal">Open questions.</h2>
+          <p class="lede reveal">The spec keeps a numbered list of pending decisions. These are the ones currently shaping the next prototyping loop. The full list of twenty lives in the markdown.</p>
+        </div>
+        <ol class="open-list reveal">
+          <li>OLED panel selection: a one-inch-class rectangular monochrome module, interface, driver IC, long-term availability</li>
+          <li>Brightness strategy: always-on dim level, raise-to-bright peak, measured current draw at each</li>
+          <li>Burn-in mitigation details: pixel-shift cadence and which static elements are exempt</li>
+          <li>Piezo relocation off the back panel, with a real listening test</li>
+          <li>Magnetic pogo-pin connector: contact count, spacing, pull strength on the bench</li>
+          <li>Hall-effect interference: confirming the charging puck magnet never false-triggers a button</li>
+          <li>Interaction state diagram: the full gesture-to-action map across all modes</li>
+          <li>Pill buttons: simple single-actuation versus two-way rocker</li>
+          <li>Stopwatch rendering: live subsecond digits versus reveal-on-lap</li>
+          <li>Games: the deliberate include or exclude call against the calm-tech thesis</li>
+        </ol>
+        <p style="margin-top: 36px" class="reveal">
+          <a class="btn-text" href="watch-hardware-spec-v1.md">Read the full spec</a>
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-cols">
+        <div>
+          <h4>Project</h4>
+          <ul>
+            <li><a href="index.html">Overview</a></li>
+            <li><a href="philosophy.html">Philosophy</a></li>
+            <li><a href="hardware.html">Hardware</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Workbench</h4>
+          <ul>
+            <li><a href="emulator.html">Emulator</a></li>
+            <li><a href="journal.html">Journal</a></li>
+            <li><a href="watch-hardware-spec-v1.md">Full spec (markdown)</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Elsewhere</h4>
+          <ul>
+            <li><a href="https://beben.design" rel="noopener">beben.design</a></li>
+            <li><a href="https://github.com/luishowin/essential-watch" rel="noopener">GitHub repository</a></li>
+            <li><a href="https://beben.design/trek-watch/" rel="noopener">Original case page</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 Beben Design. Built in public, documented in the open.</span>
+        <span class="mono">Designed in Westlands, Nairobi · 1°16'S 36°48'E</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/site.js"></script>
+</body>
+</html>

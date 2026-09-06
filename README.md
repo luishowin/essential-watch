@@ -1,40 +1,70 @@
-# trek_91_watch
-A custom watch emulation 
+# essential-watch
 
-Built on Vanilla JavaScript and HTML5 Canvas.
+The Essential Watch: a calm, repairable wrist instrument that sits between the
+Casio F-91W and the Apple Watch Ultra. A personal product project by
+[Beben Design](https://beben.design). Accessible enough for everyday wear,
+tough enough for the trail.
 
-Why? Because React or Angular adds too much abstraction layer "fluff" for a firmware simulation. You want to be close to the metal (or the pixel buffer, in this case). This single-file architecture mimics a microcontroller's loop() structure. It's modular, so you can tear it apart and inject your own logic easily.
+This repository holds the whole project: the hardware specification, the watch
+OS emulator, and the project website used to track decisions and progress.
 
-It meets all my specs: the monochrome OLED aesthetic, the simulated sensor data, the file system exports, and the state machine architecture.
+## The website
 
-The "Trek Watch F91" OS Emulator
-Controls (Keyboard Mapped):
+A static, dependency-free site for following the project day to day:
 
-Crown Rotate CW: Arrow Up
-Crown Rotate CCW: Arrow Down
-Crown Press: Enter
-BTN 1 (Action/Light): Z key
-BTN 2 (Back/Cancel): X key
+- `index.html`: project overview
+- `philosophy.html`: the calm-tech thesis behind the watch
+- `hardware.html`: the current hardware specification digest
+- `emulator.html`: the live watch OS emulator
+- `journal.html`: dated entries and the roadmap
 
-trek_watch.html
-20 Nov, 02:12
+Open `index.html` directly in a browser, or serve the folder:
 
+```bash
+python3 -m http.server 8000
+```
 
-How to use and hack this emulator
-Running it: Save the code above as an .html file and open it in any modern browser. No server needed.
+Then visit `http://localhost:8000`.
 
-Interacting: Click inside the window to focus.
-Z / X keys are your top and bottom buttons.
-Arrow Keys are your crown rotation.
-Enter is the crown press.
+## The emulator
 
-File Export: Go to the "Workout" mode, start a run (Z), wait a few seconds, stop it (Z), and save (X). It will actually download a .csv file to your computer.
+`docs/emulator1.0.html` is the baseline: a single-file watch OS emulator built
+on vanilla JavaScript and HTML5 Canvas. No frameworks, because a firmware
+simulation wants to stay close to the metal, or in this case close to the
+pixel buffer. The single-file architecture mimics a microcontroller's `loop()`
+structure and stays modular so logic can be torn apart and reinjected easily.
 
-Architecture Notes for Expansion
-I built this using a classic Game Loop pattern which is how embedded GUIs actually work (rendering frame-by-frame).
+The current production emulator lives at `js/emulator.js` and runs on the
+emulator page of the website. Earlier concepts (`docs/emulator2.0.html`,
+`docs/emulator3.0.html`) are kept as an archive of the thinking.
 
-WatchOS Class: This is the kernel. It holds the drivers (Audio, Graphics, FileSystem) and manages the active "Mode".
+### Controls
 
-Mode Class: Abstract base class. Every screen (Home, Menu, Stopwatch) inherits from this. This keeps your code modular. If you want to add the "Countdown Timer", copy the StopwatchMode class, rename it, flip the math to subtract time, and add it to the os.modes registry.
+| Input | Keyboard | Touch |
+| --- | --- | --- |
+| Crown rotate up | Arrow Up | Tap crown, upper half |
+| Crown rotate down | Arrow Down | Tap crown, lower half |
+| Crown press | Enter | Tap crown center |
+| Btn 1 (select / light) | Z | Tap upper pill button |
+| Btn 2 (back / cancel) | X | Tap lower pill button |
 
-Simulated Hardware: The SimulatedSensors class mocks data. In a real build (like using a Raspberry Pi Zero or ESP32), you would replace these variables with actual I2C sensor readings.
+Click or tap the device first so it takes focus. On desktop, arrow keys are
+only captured while the device is focused, so the page keeps scrolling
+normally.
+
+### Architecture notes
+
+- `WatchOS` is the kernel. It holds the drivers (audio, graphics, simulated
+  sensors) and manages the active mode.
+- `Mode` is the abstract base class. Every screen (home, menu, stopwatch)
+  inherits from it. To add a new mode, copy `StopwatchMode`, rename it, and
+  register it in the `os.modes` registry.
+- `SimulatedSensors` mocks data. On real hardware these values become actual
+  I2C sensor readings.
+
+## The specification
+
+`watch-hardware-spec-v1.md` is the living hardware specification, currently at
+draft v6: monochrome OLED display, CNC aluminum case, contactless Hall-effect
+buttons with a rotary crown, 10 ATM water resistance, and a 30 day battery
+target.

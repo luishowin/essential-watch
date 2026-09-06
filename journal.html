@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Journal · Essential Watch</title>
+  <meta name="description" content="The Essential Watch project journal: dated entries, decisions, wrong turns, and the roadmap from emulator to product.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/site.css">
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <a class="nav-brand" href="index.html"><span class="dot"></span>Essential Watch</a>
+      <div class="nav-links">
+        <a href="index.html">Overview</a>
+        <a href="philosophy.html">Philosophy</a>
+        <a href="hardware.html">Hardware</a>
+        <a href="emulator.html">Emulator</a>
+        <a href="journal.html" aria-current="page">Journal</a>
+      </div>
+      <button class="nav-toggle" aria-expanded="false" aria-controls="nav-panel" aria-label="Open menu">
+        <span></span><span></span>
+      </button>
+    </div>
+    <div class="nav-panel" id="nav-panel" hidden>
+      <a href="index.html">Overview</a>
+      <a href="philosophy.html">Philosophy</a>
+      <a href="hardware.html">Hardware</a>
+      <a href="emulator.html">Emulator</a>
+      <a href="journal.html" aria-current="page">Journal</a>
+    </div>
+  </nav>
+
+  <main>
+
+    <header class="hero container">
+      <span class="kicker reveal">The journal</span>
+      <h1 class="display reveal">Trial and error,<br>on the record.</h1>
+      <p class="lede reveal">No polished-render-only reveals. The research, the decisions, the iterations, and the results get written down as they happen, including the wrong turns. This page is the running log.</p>
+    </header>
+
+    <section class="section">
+      <div class="container">
+        <div class="section-head">
+          <span class="kicker reveal">The road</span>
+          <h2 class="headline reveal">From pixels to product.</h2>
+        </div>
+        <div class="timeline">
+          <div class="phase done reveal">
+            <span class="when">Phase 1 · complete</span>
+            <h3>Research</h3>
+            <p>Prior art and positioning: the F-91W, Ollee Watch mods, Pebble's nostalgia play, the Ultra ceiling. Output: the hardware specification, drafted in the open.</p>
+          </div>
+          <div class="phase active reveal">
+            <span class="when">Phase 2 · in progress</span>
+            <h3>Emulator and UX</h3>
+            <p>The watch OS lives in the browser. Next milestone: port the v6 mode cycle and gesture map into the emulator, so the interface is settled before the first circuit exists.</p>
+          </div>
+          <div class="phase reveal">
+            <span class="when">Phase 3 · next</span>
+            <h3>Industrial design</h3>
+            <p>Case CAD and mass properties, anodizing and PVD swatches, strap geometry, crown guard profile. The hand learns from what the eye already trusts.</p>
+          </div>
+          <div class="phase reveal">
+            <span class="when">Phase 4</span>
+            <h3>Prototype</h3>
+            <p>Bench bring-up on a coin cell, then a shaped rechargeable cell. Drop tests for the display mount, listening tests for the piezo, feel tests for the haptics.</p>
+          </div>
+          <div class="phase reveal">
+            <span class="when">Phase 5</span>
+            <h3>Production</h3>
+            <p>A real run of units, when the prototype stops surprising. The decision, and how it goes, lands here first.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="section-head">
+          <span class="kicker reveal">The log</span>
+          <h2 class="headline reveal">Entries.</h2>
+        </div>
+
+        <article class="entry reveal">
+          <span class="date">2026-09-06</span>
+          <h3>One name, one display, one site.</h3>
+          <p>The project had accumulated three working names: Trek Watch on the studio site, Calm-Tech Watch in the specification, Beben Watch OS in the third emulator. Today all of it becomes the Essential Watch, and the repository is renamed to match.</p>
+          <p>The display decision moves with it: spec v6 replaces the e-paper panel with a monochrome OLED. E-paper promised sunlight readability and near-zero static draw, but the emissive panel fits the baseline emulator's screen character, reads at night without a lamp module, and turns restraint into physics: one ink, one ground, a 1-bit interface. The trade-offs, daylight washout, burn-in discipline, a battery budget that now depends on the dim-state duty cycle, are written into the spec as open items rather than wished away.</p>
+          <p>And the project gets this website: five pages, plain HTML, CSS, and JavaScript, no build step. A place to keep track of the whole thing as the industrial design skills, the engineering, and the taste grow together.</p>
+        </article>
+
+        <article class="entry reveal">
+          <span class="date">2026-07-11</span>
+          <h3>Spec v5: the watch on paper.</h3>
+          <p>The specification reaches draft v5: a 42 by 36 by 9 millimetre CNC aluminum case at roughly 29 grams, 10 ATM, contactless Hall-effect buttons with a rotary crown, LRA haptics benchmarked against the Taptic Engine, piezo chimes, and a 30 day battery target. The display is e-paper at this point, with a bonding and mounting strategy flagged for drop-test validation.</p>
+          <p>Eighteen open items ship with the draft, from piezo placement to the deliberate include-or-exclude call on games. The list is the point: undecided is a state, not an embarrassment.</p>
+        </article>
+
+        <article class="entry reveal">
+          <span class="date">2026-04-27</span>
+          <h3>A precision emulator, third try.</h3>
+          <p>The third emulator concept goes bigger: a large round canvas, touch-first interaction, a chassis rendered in CSS. It explores where the interface could go with more pixels and a finger instead of keys.</p>
+          <p>It stays an archive piece. The conclusion it earns: the restraint of the 128 by 64 baseline is the product, not a constraint to escape.</p>
+        </article>
+
+        <article class="entry reveal">
+          <span class="date">2025-11-20</span>
+          <h3>Emulator 1.0: the baseline.</h3>
+          <p>The first working watch OS simulation: a 128 by 64 monochrome panel, cyan on black, driven by a game loop and a Mode class hierarchy in a single HTML file. Keyboard controls stand in for the physical buttons and crown, and simulated sensors feed the screens.</p>
+          <p>Five years of F-91W affection and one month of JavaScript produce something that already feels like a watch. This is the look and the architecture the project builds on.</p>
+        </article>
+
+        <div class="emulator-note reveal" style="max-width: 680px">
+          <span class="kicker">Adding an entry</span>
+          Open journal.html in any editor, copy an article block with the class entry, paste it at the top of the list, and set the date. Newest entries live first. That is the whole workflow, by design.
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-cols">
+        <div>
+          <h4>Project</h4>
+          <ul>
+            <li><a href="index.html">Overview</a></li>
+            <li><a href="philosophy.html">Philosophy</a></li>
+            <li><a href="hardware.html">Hardware</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Workbench</h4>
+          <ul>
+            <li><a href="emulator.html">Emulator</a></li>
+            <li><a href="journal.html">Journal</a></li>
+            <li><a href="watch-hardware-spec-v1.md">Full spec (markdown)</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Elsewhere</h4>
+          <ul>
+            <li><a href="https://beben.design" rel="noopener">beben.design</a></li>
+            <li><a href="https://github.com/luishowin/essential-watch" rel="noopener">GitHub repository</a></li>
+            <li><a href="https://beben.design/trek-watch/" rel="noopener">Original case page</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 Beben Design. Built in public, documented in the open.</span>
+        <span class="mono">Designed in Westlands, Nairobi · 1°16'S 36°48'E</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/site.js"></script>
+</body>
+</html>

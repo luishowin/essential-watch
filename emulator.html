@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emulator · Essential Watch</title>
+  <meta name="description" content="The Essential Watch OS emulator. Test the watch UX in the browser, before the hardware exists.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&family=Doto:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/site.css">
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <a class="nav-brand" href="index.html"><span class="dot"></span>Essential Watch</a>
+      <div class="nav-links">
+        <a href="index.html">Overview</a>
+        <a href="philosophy.html">Philosophy</a>
+        <a href="hardware.html">Hardware</a>
+        <a href="emulator.html" aria-current="page">Emulator</a>
+        <a href="journal.html">Journal</a>
+      </div>
+      <button class="nav-toggle" aria-expanded="false" aria-controls="nav-panel" aria-label="Open menu">
+        <span></span><span></span>
+      </button>
+    </div>
+    <div class="nav-panel" id="nav-panel" hidden>
+      <a href="index.html">Overview</a>
+      <a href="philosophy.html">Philosophy</a>
+      <a href="hardware.html">Hardware</a>
+      <a href="emulator.html" aria-current="page">Emulator</a>
+      <a href="journal.html">Journal</a>
+    </div>
+  </nav>
+
+  <main>
+
+    <header class="hero container">
+      <span class="kicker reveal">The emulator</span>
+      <h1 class="display reveal">The watch,<br>before the watch.</h1>
+      <p class="lede reveal">Every interaction gets tested here first, in pixels, where changing your mind costs nothing. This is the Essential Watch OS running today, a 128 by 64 monochrome panel driven by the same mode machine the firmware will use.</p>
+      <p class="mono reveal" style="margin-top: 20px">EMULATOR 1.0 · CANVAS 128×64 · VANILLA JS</p>
+    </header>
+
+    <section class="section">
+      <div class="container">
+        <div class="emulator-stage">
+          <div class="device-wrap reveal">
+            <div id="device" tabindex="0" role="application" aria-label="Essential Watch emulator. Arrow keys rotate the crown, Enter presses it, Z and X are the buttons.">
+              <canvas id="display" width="128" height="64" aria-label="Emulated watch screen"></canvas>
+              <div class="device-scanlines" aria-hidden="true"></div>
+              <button class="device-btn btn-upper" type="button" aria-label="Button one, select"></button>
+              <button class="device-btn crown" type="button" aria-label="Crown. Tap the top to rotate up, the bottom to rotate down, the middle to press."></button>
+              <button class="device-btn btn-lower" type="button" aria-label="Button two, back"></button>
+              <div class="device-feedback" aria-hidden="true">
+                <span id="fb-btn-upper" class="fb-icon">●</span>
+                <span id="fb-btn-lower" class="fb-icon">●</span>
+                <span id="fb-rotate-up" class="fb-icon">▲</span>
+                <span id="fb-rotate-down" class="fb-icon">▼</span>
+                <span id="fb-crown-press" class="fb-icon">[OK]</span>
+              </div>
+            </div>
+            <p class="mono" style="text-align: center; margin-top: 24px">Click or tap the watch to focus it.</p>
+          </div>
+
+          <div class="emulator-side reveal">
+            <h3>Controls</h3>
+            <table class="control-table">
+              <thead>
+                <tr><th>Action</th><th>Keyboard</th><th>Touch</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Crown rotate up</td><td><kbd>↑</kbd></td><td>Tap crown, top</td></tr>
+                <tr><td>Crown rotate down</td><td><kbd>↓</kbd></td><td>Tap crown, bottom</td></tr>
+                <tr><td>Crown press</td><td><kbd>Enter</kbd></td><td>Tap crown, middle</td></tr>
+                <tr><td>Button 1, select</td><td><kbd>Z</kbd></td><td>Tap upper pill</td></tr>
+                <tr><td>Button 2, back</td><td><kbd>X</kbd></td><td>Tap lower pill</td></tr>
+              </tbody>
+            </table>
+            <p class="body-copy" style="font-size: 14px; margin-top: 16px">Hold any key or button for half a second for a long press. From the watch face, a long press of the crown opens the menu.</p>
+
+            <div class="emulator-note">
+              <span class="kicker">What is simulated</span>
+              The game loop, the mode state machine, simulated heart rate and heading, piezo-style beeps and chimes, and every gesture: click, double press, long press, rotation. What is not simulated yet: the mode cycle from the v6 spec, BLE notifications, and real sensor behaviour. The screen runs a 128 by 64 monochrome panel at 30 frames per second.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="section-head">
+          <span class="kicker reveal">Under the hood</span>
+          <h2 class="headline reveal">Close to the pixel buffer.</h2>
+          <p class="lede reveal">No framework, by conviction. A firmware simulation wants the same shape as firmware, so the emulator borrows the structure of an embedded GUI.</p>
+        </div>
+        <div class="card-grid" data-stagger>
+          <div class="card reveal">
+            <span class="kicker">Kernel</span>
+            <h3>WatchOS class</h3>
+            <p>Holds the drivers: audio, graphics, simulated sensors, input feedback. Runs the frame loop and manages the active mode, the way a microcontroller loop() would.</p>
+          </div>
+          <div class="card reveal">
+            <span class="kicker">Screens</span>
+            <h3>Mode classes</h3>
+            <p>Every screen inherits from one abstract Mode base: home, menu, stopwatch, timer, alarms, workout, compass, info. Adding a mode is copying a class and registering it.</p>
+          </div>
+          <div class="card reveal">
+            <span class="kicker">Hardware</span>
+            <h3>SimulatedSensors</h3>
+            <p>Mock heart rate, battery, and heading today. On real hardware these become I2C readings, and the modes do not know the difference.</p>
+          </div>
+        </div>
+        <p style="margin-top: 36px" class="reveal">
+          <a class="btn-text" href="journal.html">Track the next emulator milestone</a>
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-cols">
+        <div>
+          <h4>Project</h4>
+          <ul>
+            <li><a href="index.html">Overview</a></li>
+            <li><a href="philosophy.html">Philosophy</a></li>
+            <li><a href="hardware.html">Hardware</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Workbench</h4>
+          <ul>
+            <li><a href="emulator.html">Emulator</a></li>
+            <li><a href="journal.html">Journal</a></li>
+            <li><a href="watch-hardware-spec-v1.md">Full spec (markdown)</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Elsewhere</h4>
+          <ul>
+            <li><a href="https://beben.design" rel="noopener">beben.design</a></li>
+            <li><a href="https://github.com/luishowin/essential-watch" rel="noopener">GitHub repository</a></li>
+            <li><a href="https://beben.design/trek-watch/" rel="noopener">Original case page</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 Beben Design. Built in public, documented in the open.</span>
+        <span class="mono">Designed in Westlands, Nairobi · 1°16'S 36°48'E</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/site.js"></script>
+  <script src="js/emulator.js"></script>
+</body>
+</html>
