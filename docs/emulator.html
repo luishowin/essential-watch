@@ -10,6 +10,15 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&family=Doto:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/site.css">
+  <script>
+    /* Apply the stored theme before first paint, so a dark reload never flashes white. */
+    (function () {
+      try {
+        var t = localStorage.getItem("ew-theme");
+        if (t === "dark" || t === "light") document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body>
 
@@ -23,6 +32,10 @@
         <a href="emulator.html" aria-current="page">Emulator</a>
         <a href="journal.html">Journal</a>
       </div>
+      <button class="theme-toggle" type="button" aria-pressed="false" aria-label="Switch to dark theme" title="Dark theme">
+        <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.6v2.1M12 19.3v2.1M4.3 4.3l1.5 1.5M18.2 18.2l1.5 1.5M2.6 12h2.1M19.3 12h2.1M4.3 19.7l1.5-1.5M18.2 5.8l1.5-1.5"/></svg>
+      </button>
       <button class="nav-toggle" aria-expanded="false" aria-controls="nav-panel" aria-label="Open menu">
         <span></span><span></span>
       </button>
@@ -121,6 +134,36 @@
       </div>
     </section>
 
+    <section class="section">
+      <div class="container">
+        <div class="section-head">
+          <span class="kicker reveal">Archive</span>
+          <h2 class="headline reveal">Earlier builds.</h2>
+          <p class="lede reveal">Three prototypes came before the emulator on this page. They are frozen where they landed, single files with no shared code, kept because the wrong turns are part of the record.</p>
+        </div>
+        <div class="card-grid" data-stagger>
+          <div class="card reveal">
+            <span class="kicker">2025-11-20</span>
+            <h3>Emulator 1.0</h3>
+            <p>The baseline. A 128 by 64 monochrome panel, cyan on black, a game loop and a Mode class hierarchy in one HTML file. This is the architecture the current build inherits.</p>
+            <p style="margin-top:16px"><a class="btn-text" href="emulator1.0.html">Open 1.0</a></p>
+          </div>
+          <div class="card reveal">
+            <span class="kicker">Concept</span>
+            <h3>Emulator 2.0</h3>
+            <p>The same panel with a wider mode set: menu, stopwatch, workout, compass, alarms, info. A grey case, a blue OLED, and a mode stack instead of a flat registry.</p>
+            <p style="margin-top:16px"><a class="btn-text" href="emulator2.0.html">Open 2.0</a></p>
+          </div>
+          <div class="card reveal">
+            <span class="kicker">2026-04-27</span>
+            <h3>Emulator 3.0</h3>
+            <p>A large round canvas, touch first, chassis rendered in CSS. It explored more pixels and a finger instead of keys, and earned the conclusion that the 128 by 64 restraint is the product.</p>
+            <p style="margin-top:16px"><a class="btn-text" href="emulator3.0.html">Open 3.0</a></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <footer class="footer">
@@ -139,7 +182,7 @@
           <ul>
             <li><a href="emulator.html">Emulator</a></li>
             <li><a href="journal.html">Journal</a></li>
-            <li><a href="watch-hardware-spec-v1.md">Full spec (markdown)</a></li>
+            <li><a href="spec.html">Full spec</a></li>
           </ul>
         </div>
         <div>

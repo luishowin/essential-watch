@@ -7,28 +7,82 @@
 /* ---------- Tokens ---------- */
 
 :root {
+  color-scheme: light;
+
   --bg: #ffffff;
+  --surface: #ffffff;        /* raised panels: kbd, nav drawer */
   --ink: #1d1d1f;            /* primary text, reads black */
   --ink-soft: #6e6e73;       /* secondary text */
   --ink-faint: #86868b;      /* tertiary / footer text */
   --accent: #0071e3;
   --accent-hover: #0077ed;
   --accent-visited: #0071e3;
+  --on-accent: #ffffff;      /* text on an accent fill */
+  --nav-link: rgba(29, 29, 31, 0.72);
+  --selection: rgba(0, 113, 227, 0.16);
   --hairline: #e8e8ed;       /* faint grey divider */
   --hairline-strong: #d2d2d7;
   --frost: rgba(255, 255, 255, 0.82);
+  --shadow-panel: rgba(0, 0, 0, 0.18);
 
   --font-text: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-mono: "Roboto Mono", "SF Mono", Menlo, Consolas, monospace;
 
   --measure: 1080px;
   --gutter: clamp(20px, 5vw, 48px);
-  --section-pad: clamp(72px, 12vw, 144px);
+  --section-pad: clamp(48px, 7vw, 88px);
 
-  --nav-h: 52px;
+  --nav-h: 48px;
 
   --radius-card: 18px;
   --radius-pill: 980px;
+}
+
+/* Dark palette.
+   Two blocks on purpose: the media query serves the system preference (and works
+   with JS off), the attribute block lets an explicit toggle win in both directions.
+   The declarations below are identical. Change one, change the other. */
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+  color-scheme: dark;
+
+  --bg: #0d0d0f;
+  --surface: #161618;
+  --ink: #f5f5f7;
+  --ink-soft: #a1a1a6;
+  --ink-faint: #86868b;
+  --accent: #2997ff;
+  --accent-hover: #4aa8ff;
+  --accent-visited: #2997ff;
+  --on-accent: #ffffff;
+  --nav-link: rgba(245, 245, 247, 0.72);
+  --selection: rgba(41, 151, 255, 0.24);
+  --hairline: #2a2a2e;
+  --hairline-strong: #3a3a3f;
+  --frost: rgba(13, 13, 15, 0.82);
+  --shadow-panel: rgba(0, 0, 0, 0.6);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #0d0d0f;
+  --surface: #161618;
+  --ink: #f5f5f7;
+  --ink-soft: #a1a1a6;
+  --ink-faint: #86868b;
+  --accent: #2997ff;
+  --accent-hover: #4aa8ff;
+  --accent-visited: #2997ff;
+  --on-accent: #ffffff;
+  --nav-link: rgba(245, 245, 247, 0.72);
+  --selection: rgba(41, 151, 255, 0.24);
+  --hairline: #2a2a2e;
+  --hairline-strong: #3a3a3f;
+  --frost: rgba(13, 13, 15, 0.82);
+  --shadow-panel: rgba(0, 0, 0, 0.6);
 }
 
 /* ---------- Reset ---------- */
@@ -49,8 +103,8 @@ body {
   background: var(--bg);
   color: var(--ink);
   font-family: var(--font-text);
-  font-size: 17px;
-  line-height: 1.47059;
+  font-size: 16px;
+  line-height: 1.5;
   font-weight: 400;
   letter-spacing: -0.011em;
   -webkit-font-smoothing: antialiased;
@@ -82,7 +136,7 @@ a:hover {
 }
 
 ::selection {
-  background: rgba(0, 113, 227, 0.16);
+  background: var(--selection);
 }
 
 :focus-visible {
@@ -94,15 +148,15 @@ a:hover {
 /* ---------- Typography ---------- */
 
 .display {
-  font-size: clamp(40px, 8vw, 80px);
-  line-height: 1.05;
+  font-size: clamp(32px, 5vw, 52px);
+  line-height: 1.08;
   font-weight: 700;
   letter-spacing: -0.022em;
 }
 
 .headline {
-  font-size: clamp(32px, 5vw, 56px);
-  line-height: 1.07;
+  font-size: clamp(24px, 3.2vw, 36px);
+  line-height: 1.12;
   font-weight: 700;
   letter-spacing: -0.018em;
 }
@@ -115,8 +169,8 @@ a:hover {
 }
 
 .lede {
-  font-size: clamp(19px, 2.2vw, 21px);
-  line-height: 1.52;
+  font-size: clamp(17px, 1.8vw, 18px);
+  line-height: 1.55;
   color: var(--ink-soft);
   letter-spacing: -0.01em;
 }
@@ -161,7 +215,7 @@ a:hover {
 
 .section-head {
   max-width: 720px;
-  margin-bottom: clamp(36px, 6vw, 64px);
+  margin-bottom: clamp(28px, 4vw, 44px);
 }
 
 .section-head .kicker {
@@ -197,8 +251,7 @@ a:hover {
   height: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 24px;
+  gap: clamp(16px, 3vw, 32px);
 }
 
 .nav-brand {
@@ -231,7 +284,7 @@ a:hover {
 
 .nav-links a {
   font-size: 13px;
-  color: rgba(29, 29, 31, 0.72);
+  color: var(--nav-link);
   padding: 8px 2px;
 }
 
@@ -279,10 +332,61 @@ a:hover {
   display: none;
 }
 
+/* ---------- Theme toggle ---------- */
+/* Lives in the nav bar at every width, so it stays reachable when the
+   links collapse into the drawer. */
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-right: -10px;
+  margin-left: auto;
+  border: none;
+  background: none;
+  color: var(--nav-link);
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s ease;
+}
+
+.theme-toggle:hover {
+  color: var(--ink);
+}
+
+.theme-toggle svg {
+  width: 17px;
+  height: 17px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Show the icon for the theme the button switches TO. */
+.theme-toggle .icon-moon { display: block; }
+.theme-toggle .icon-sun { display: none; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .theme-toggle .icon-moon { display: none; }
+  :root:not([data-theme="light"]) .theme-toggle .icon-sun { display: block; }
+}
+
+:root[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+:root[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
+
+/* The hamburger is display:none above 734px, so on desktop the toggle is the
+   element that needs the optical pull to the gutter edge. Below it, the
+   hamburger takes that job back (see the 734px block). */
+
 /* ---------- Hero ---------- */
 
 .hero {
-  padding-block: clamp(56px, 9vw, 110px) clamp(40px, 6vw, 72px);
+  padding-block: clamp(36px, 5vw, 64px) clamp(28px, 4vw, 48px);
   text-align: center;
 }
 
@@ -302,7 +406,7 @@ a:hover {
 }
 
 .hero-media {
-  margin-top: clamp(40px, 6vw, 64px);
+  margin-top: clamp(28px, 4vw, 44px);
   border-radius: var(--radius-card);
   overflow: hidden;
   border: 1px solid var(--hairline);
@@ -336,7 +440,7 @@ a:hover {
 
 .btn-primary {
   background: var(--accent);
-  color: #ffffff;
+  color: var(--on-accent);
   transition: background 0.2s ease;
 }
 
@@ -799,7 +903,8 @@ a:hover {
   image-rendering: pixelated;
   width: 384px;
   height: 192px;
-  max-width: calc(100vw - 96px);
+  /* Leaves room for the crown and pill buttons, which sit outside the case. */
+  max-width: calc(100vw - 124px);
   height: auto;
   aspect-ratio: 2 / 1;
 }
@@ -867,7 +972,7 @@ a:hover {
 
 .fb-icon {
   position: absolute;
-  color: #0071e3;
+  color: var(--accent);
   font-family: var(--font-mono);
   font-weight: 500;
   font-size: 13px;
@@ -928,7 +1033,7 @@ kbd {
   font-family: var(--font-mono);
   font-size: 12px;
   color: var(--ink);
-  background: #ffffff;
+  background: var(--surface);
   border: 1px solid var(--hairline-strong);
   border-bottom-width: 2px;
   border-radius: 6px;
@@ -949,6 +1054,213 @@ kbd {
 .emulator-note .kicker {
   display: block;
   margin-bottom: 10px;
+}
+
+/* ---------- Spec page, rendered markdown ---------- */
+
+.hero-compact {
+  text-align: left;
+  max-width: var(--measure);
+}
+
+.hero-compact .lede {
+  margin-inline: 0;
+  max-width: 620px;
+}
+
+/* One column until the contents list exists. The loading and failure states
+   have no TOC, and must not be squeezed into the column it would occupy. */
+.spec-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(28px, 5vw, 64px);
+  align-items: start;
+}
+
+.spec-layout.has-toc {
+  grid-template-columns: 190px minmax(0, 1fr);
+}
+
+.spec-toc {
+  position: sticky;
+  top: calc(var(--nav-h) + 24px);
+}
+
+.spec-toc h2 {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 12px;
+}
+
+.spec-toc li + li {
+  margin-top: 2px;
+}
+
+.spec-toc a {
+  display: block;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--ink-soft);
+  padding: 5px 0 5px 12px;
+  border-left: 1px solid var(--hairline);
+}
+
+.spec-toc a:hover {
+  color: var(--ink);
+  border-left-color: var(--hairline-strong);
+  text-decoration: none;
+}
+
+/* The markdown's own h1 repeats the page hero and the mono stamp above it,
+   so it is suppressed rather than edited out of the source of truth. */
+.md > h1:first-child {
+  display: none;
+}
+
+.md h2 {
+  font-size: clamp(19px, 2.4vw, 23px);
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  margin-top: 44px;
+  padding-top: 20px;
+  border-top: 1px solid var(--hairline);
+}
+
+.md h3 {
+  font-size: 17px;
+  font-weight: 600;
+  margin-top: 28px;
+}
+
+.md h2:first-child,
+.md h3:first-child {
+  margin-top: 0;
+}
+
+.md h2,
+.md h3,
+.md li[id] {
+  scroll-margin-top: calc(var(--nav-h) + 16px);
+}
+
+.md p {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  margin-top: 14px;
+}
+
+.md ul,
+.md ol {
+  margin-top: 14px;
+  padding-left: 22px;
+}
+
+.md ul {
+  list-style: disc;
+}
+
+.md ol {
+  list-style: decimal;
+}
+
+.md li {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  margin-top: 8px;
+  padding-left: 4px;
+}
+
+.md li::marker {
+  color: var(--ink-faint);
+}
+
+.md li ul {
+  list-style: circle;
+  margin-top: 8px;
+}
+
+.md li ul li {
+  font-size: 14px;
+  color: var(--ink-faint);
+}
+
+.md strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.md code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: 5px;
+  padding: 1px 5px;
+}
+
+.md hr {
+  border: none;
+  border-top: 1px solid var(--hairline);
+  margin: 36px 0 0;
+}
+
+/* Deep-linked open item, so spec.html#oi-12 lands somewhere obvious.
+   .is-target covers the load-time case, where the element did not exist yet
+   when the browser resolved the fragment and :target found nothing. */
+.md li[id]:target,
+.md li[id].is-target {
+  background: var(--selection);
+  border-radius: 6px;
+  padding: 6px 8px 6px 4px;
+  margin-left: -8px;
+  padding-left: 12px;
+}
+
+.md-anchor {
+  font-family: var(--font-mono);
+  font-size: 0.72em;
+  font-weight: 400;
+  color: var(--ink-faint);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.md h2:hover .md-anchor,
+.md h3:hover .md-anchor,
+.md-anchor:focus-visible {
+  opacity: 1;
+  text-decoration: none;
+}
+
+@media (max-width: 1068px) {
+  .spec-layout,
+  .spec-layout.has-toc {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .spec-toc {
+    position: static;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-card);
+    padding: 20px 22px;
+  }
+
+  .spec-toc ul {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 0 20px;
+  }
+
+  .spec-toc li + li {
+    margin-top: 0;
+  }
 }
 
 /* ---------- Footer ---------- */
@@ -1060,16 +1372,21 @@ kbd {
     display: flex;
   }
 
+  .theme-toggle {
+    margin-right: 0;
+    margin-left: auto;
+  }
+
   .nav-panel {
     display: block;
     position: absolute;
     top: var(--nav-h);
     left: 0;
     right: 0;
-    background: #ffffff;
+    background: var(--surface);
     border-bottom: 1px solid var(--hairline);
     padding: 8px var(--gutter) 20px;
-    box-shadow: 0 20px 40px -24px rgba(0, 0, 0, 0.18);
+    box-shadow: 0 20px 40px -24px var(--shadow-panel);
   }
 
   .nav-panel[hidden] {

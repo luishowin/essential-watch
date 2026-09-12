@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Full spec · Essential Watch</title>
+  <meta name="description" content="The full Essential Watch hardware specification, draft v6, rendered live from the markdown source held in this repository.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/site.css">
+  <script>
+    /* Apply the stored theme before first paint, so a dark reload never flashes white. */
+    (function () {
+      try {
+        var t = localStorage.getItem("ew-theme");
+        if (t === "dark" || t === "light") document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <a class="nav-brand" href="index.html"><span class="dot"></span>Essential Watch</a>
+      <div class="nav-links">
+        <a href="index.html">Overview</a>
+        <a href="philosophy.html">Philosophy</a>
+        <a href="hardware.html" aria-current="page">Hardware</a>
+        <a href="emulator.html">Emulator</a>
+        <a href="journal.html">Journal</a>
+      </div>
+      <button class="theme-toggle" type="button" aria-pressed="false" aria-label="Switch to dark theme" title="Dark theme">
+        <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.6v2.1M12 19.3v2.1M4.3 4.3l1.5 1.5M18.2 18.2l1.5 1.5M2.6 12h2.1M19.3 12h2.1M4.3 19.7l1.5-1.5M18.2 5.8l1.5-1.5"/></svg>
+      </button>
+      <button class="nav-toggle" aria-expanded="false" aria-controls="nav-panel" aria-label="Open menu">
+        <span></span><span></span>
+      </button>
+    </div>
+    <div class="nav-panel" id="nav-panel" hidden>
+      <a href="index.html">Overview</a>
+      <a href="philosophy.html">Philosophy</a>
+      <a href="hardware.html" aria-current="page">Hardware</a>
+      <a href="emulator.html">Emulator</a>
+      <a href="journal.html">Journal</a>
+    </div>
+  </nav>
+
+  <main>
+
+    <header class="hero container hero-compact">
+      <span class="kicker reveal">Hardware specification</span>
+      <h1 class="display reveal">The full spec.</h1>
+      <p class="lede reveal">Rendered live from <code>hardware-spec.md</code> in this repository. The markdown is the source of truth, so this page cannot drift from it.</p>
+      <p class="mono reveal" id="spec-meta">Loading the specification.</p>
+    </header>
+
+    <section class="section">
+      <div class="container spec-layout">
+        <nav class="spec-toc reveal" id="spec-toc" aria-label="Specification contents" hidden>
+          <h2>Contents</h2>
+          <ul id="spec-toc-list"></ul>
+        </nav>
+        <div class="md" id="spec-body">
+          <p class="body-copy">Loading the specification.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-cols">
+        <div>
+          <h4>Project</h4>
+          <ul>
+            <li><a href="index.html">Overview</a></li>
+            <li><a href="philosophy.html">Philosophy</a></li>
+            <li><a href="hardware.html">Hardware</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Workbench</h4>
+          <ul>
+            <li><a href="emulator.html">Emulator</a></li>
+            <li><a href="journal.html">Journal</a></li>
+            <li><a href="spec.html">Full spec</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Elsewhere</h4>
+          <ul>
+            <li><a href="https://beben.design" rel="noopener">beben.design</a></li>
+            <li><a href="https://github.com/luishowin/essential-watch" rel="noopener">GitHub repository</a></li>
+            <li><a href="https://beben.design/trek-watch/" rel="noopener">Original case page</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 Beben Design. Built in public, documented in the open.</span>
+        <span class="mono">Designed in Westlands, Nairobi · 1°16'S 36°48'E</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/site.js"></script>
+  <script src="js/markdown.js"></script>
+  <script>
+    (function () {
+      "use strict";
+
+      var SOURCE = "hardware-spec.md";
+      var RAW = "https://github.com/luishowin/essential-watch/blob/main/docs/" + SOURCE;
+
+      var body = document.getElementById("spec-body");
+      var meta = document.getElementById("spec-meta");
+      var toc = document.getElementById("spec-toc");
+      var tocList = document.getElementById("spec-toc-list");
+
+      function fail() {
+        meta.textContent = "SOURCE NOT LOADED";
+        body.innerHTML =
+          '<div class="emulator-note" style="max-width:680px">' +
+          '<span class="kicker">This page reads the markdown at runtime</span>' +
+          'It could not load <code>' + SOURCE + '</code>. Opening the file straight from disk ' +
+          'will do that, because browsers block fetch on file:// URLs. Serve the folder instead:' +
+          '<p class="mono" style="margin-top:14px">python3 -m http.server 8000 --directory docs</p>' +
+          '<p style="margin-top:14px">Then visit <span class="mono">http://localhost:8000/spec.html</span>, ' +
+          'or <a href="' + RAW + '" rel="noopener">read the source on GitHub</a>.</p></div>';
+      }
+
+      function buildToc() {
+        var heads = body.querySelectorAll("h2");
+        if (!heads.length) return;
+        var frag = document.createDocumentFragment();
+        Array.prototype.forEach.call(heads, function (h) {
+          var li = document.createElement("li");
+          var a = document.createElement("a");
+          a.href = "#" + h.id;
+          /* The trailing anchor glyph belongs to the heading, not the contents. */
+          a.textContent = h.textContent.replace(/\s*#\s*$/, "");
+          li.appendChild(a);
+          frag.appendChild(li);
+        });
+        tocList.appendChild(frag);
+        toc.hidden = false;
+        toc.parentNode.classList.add("has-toc");
+      }
+
+      function stamp(text) {
+        var m = /Draft v(\d+)/i.exec(text);
+        var d = /Updated ([A-Z][a-z]+ \d+, \d{4})/.exec(text);
+        var bits = [];
+        if (m) bits.push("SPEC DRAFT V" + m[1]);
+        if (d) bits.push(d[1].toUpperCase());
+        bits.push("RENDERED FROM MARKDOWN");
+        meta.textContent = bits.join(" \u00b7 ");
+      }
+
+      if (!window.fetch) { fail(); return; }
+
+      fetch(SOURCE, { cache: "no-cache" })
+        .then(function (r) {
+          if (!r.ok) throw new Error(r.status);
+          return r.text();
+        })
+        .then(function (text) {
+          body.innerHTML = window.renderMarkdown(text);
+          stamp(text);
+          buildToc();
+          markHash();
+        })
+        .catch(fail);
+
+      /* A deep link arrives before the content it points at exists, so the
+         browser has nothing to scroll to and :target matches nothing. Both get
+         re-applied by hand once the markdown is in the page. The jump is
+         instant on purpose: a smooth scroll started this early gets dropped.
+         Hoisted, so the .then above can call it. */
+      function markHash() {
+        var previous = body.querySelector(".is-target");
+        if (previous) previous.classList.remove("is-target");
+        if (!location.hash) return;
+
+        var target = document.getElementById(location.hash.slice(1));
+        if (!target) return;
+
+        target.scrollIntoView({ behavior: "instant", block: "start" });
+        if (target.tagName === "LI") target.classList.add("is-target");
+      }
+
+      window.addEventListener("hashchange", markHash);
+    })();
+  </script>
+</body>
+</html>

@@ -10,21 +10,39 @@ OS emulator, and the project website used to track decisions and progress.
 
 ## The website
 
-A static, dependency-free site for following the project day to day:
+A static, dependency-free site for following the project day to day. It lives in
+`docs/`, which is also what GitHub Pages publishes:
 
-- `index.html`: project overview
-- `philosophy.html`: the calm-tech thesis behind the watch
-- `hardware.html`: the current hardware specification digest
-- `emulator.html`: the live watch OS emulator
-- `journal.html`: dated entries and the roadmap
+**https://luishowin.github.io/essential-watch/**
 
-Open `index.html` directly in a browser, or serve the folder:
+- `docs/index.html`: project overview
+- `docs/philosophy.html`: the calm-tech thesis behind the watch
+- `docs/hardware.html`: the current hardware specification digest
+- `docs/spec.html`: the full specification, rendered live from the markdown
+- `docs/emulator.html`: the live watch OS emulator
+- `docs/journal.html`: dated entries and the roadmap
+
+Pages builds from the `main` branch, `/docs` folder, so anything merged to `main`
+under `docs/` is published. `docs/.nojekyll` keeps the build byte-for-byte.
+
+Serve the folder:
 
 ```bash
-python3 -m http.server 8000
+python3 -m http.server 8000 --directory docs
 ```
 
 Then visit `http://localhost:8000`.
+
+Every page except `spec.html` also opens straight from disk. `spec.html` reads the
+markdown at runtime, and browsers block `fetch` on `file://` URLs, so that one page
+needs the server above. It says so itself if you open it the other way.
+
+### Theme
+
+Light and dark, toggled by the button in the nav bar. The site follows the system
+preference until you click it; after that your choice is remembered in
+`localStorage` under `ew-theme`. A small inline script in each page head applies the
+stored theme before first paint, so a dark reload never flashes white.
 
 ## The emulator
 
@@ -34,7 +52,7 @@ simulation wants to stay close to the metal, or in this case close to the
 pixel buffer. The single-file architecture mimics a microcontroller's `loop()`
 structure and stays modular so logic can be torn apart and reinjected easily.
 
-The current production emulator lives at `js/emulator.js` and runs on the
+The current production emulator lives at `docs/js/emulator.js` and runs on the
 emulator page of the website. Earlier concepts (`docs/emulator2.0.html`,
 `docs/emulator3.0.html`) are kept as an archive of the thinking.
 
@@ -64,7 +82,14 @@ normally.
 
 ## The specification
 
-`watch-hardware-spec-v1.md` is the living hardware specification, currently at
-draft v6: monochrome OLED display, CNC aluminum case, contactless Hall-effect
-buttons with a rotary crown, 10 ATM water resistance, and a 30 day battery
-target.
+`docs/hardware-spec.md` is the living hardware specification, currently at draft v6:
+monochrome OLED display, CNC aluminum case, contactless Hall-effect buttons with a
+rotary crown, 10 ATM water resistance, and a 30 day battery target.
+
+It is the single source of truth. `docs/spec.html` renders it in the browser with
+`docs/js/markdown.js`, a small hand-written parser, so the page cannot drift from the
+source. Section headings and the numbered open items get stable anchors, which means a
+specific pending decision is directly linkable: `spec.html#oi-12` is the OLED panel
+selection that gates the power model.
+
+Edit the markdown. The site follows.

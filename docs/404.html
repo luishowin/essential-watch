@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Not found · Essential Watch</title>
+  <meta name="description" content="That page does not exist on the Essential Watch project site.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/site.css">
+  <script>
+    /* Apply the stored theme before first paint, so a dark reload never flashes white. */
+    (function () {
+      try {
+        var t = localStorage.getItem("ew-theme");
+        if (t === "dark" || t === "light") document.documentElement.setAttribute("data-theme", t);
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <a class="nav-brand" href="index.html"><span class="dot"></span>Essential Watch</a>
+      <div class="nav-links">
+        <a href="index.html">Overview</a>
+        <a href="philosophy.html">Philosophy</a>
+        <a href="hardware.html">Hardware</a>
+        <a href="emulator.html">Emulator</a>
+        <a href="journal.html">Journal</a>
+      </div>
+      <button class="theme-toggle" type="button" aria-pressed="false" aria-label="Switch to dark theme" title="Dark theme">
+        <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.6v2.1M12 19.3v2.1M4.3 4.3l1.5 1.5M18.2 18.2l1.5 1.5M2.6 12h2.1M19.3 12h2.1M4.3 19.7l1.5-1.5M18.2 5.8l1.5-1.5"/></svg>
+      </button>
+      <button class="nav-toggle" aria-expanded="false" aria-controls="nav-panel" aria-label="Open menu">
+        <span></span><span></span>
+      </button>
+    </div>
+    <div class="nav-panel" id="nav-panel" hidden>
+      <a href="index.html">Overview</a>
+      <a href="philosophy.html">Philosophy</a>
+      <a href="hardware.html">Hardware</a>
+      <a href="emulator.html">Emulator</a>
+      <a href="journal.html">Journal</a>
+    </div>
+  </nav>
+
+  <main>
+
+    <header class="hero container">
+      <span class="kicker reveal">404</span>
+      <h1 class="display reveal">Nothing here.</h1>
+      <p class="lede reveal">That page does not exist. It may have moved when the site was reorganised into the docs folder, or it may never have existed at all.</p>
+      <div class="cta-row reveal">
+        <a class="btn btn-primary" href="index.html">Back to the overview</a>
+        <a class="btn btn-outline" href="spec.html">Read the spec</a>
+      </div>
+    </header>
+
+    <section class="section">
+      <div class="container">
+        <div class="card-grid two" data-stagger>
+          <div class="card reveal">
+            <span class="kicker">Project</span>
+            <h3>The documents</h3>
+            <p><a href="index.html">Overview</a>, <a href="philosophy.html">philosophy</a>, the <a href="hardware.html">hardware digest</a>, the <a href="spec.html">full specification</a>, and the <a href="journal.html">journal</a>.</p>
+          </div>
+          <div class="card reveal">
+            <span class="kicker">Workbench</span>
+            <h3>The emulator</h3>
+            <p>The <a href="emulator.html">current build</a>, plus the archived prototypes: <a href="emulator1.0.html">1.0</a>, <a href="emulator2.0.html">2.0</a>, <a href="emulator3.0.html">3.0</a>.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-cols">
+        <div>
+          <h4>Project</h4>
+          <ul>
+            <li><a href="index.html">Overview</a></li>
+            <li><a href="philosophy.html">Philosophy</a></li>
+            <li><a href="hardware.html">Hardware</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Workbench</h4>
+          <ul>
+            <li><a href="emulator.html">Emulator</a></li>
+            <li><a href="journal.html">Journal</a></li>
+            <li><a href="spec.html">Full spec</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Elsewhere</h4>
+          <ul>
+            <li><a href="https://beben.design" rel="noopener">beben.design</a></li>
+            <li><a href="https://github.com/luishowin/essential-watch" rel="noopener">GitHub repository</a></li>
+            <li><a href="https://beben.design/trek-watch/" rel="noopener">Original case page</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 Beben Design. Built in public, documented in the open.</span>
+        <span class="mono">Designed in Westlands, Nairobi · 1°16'S 36°48'E</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/site.js"></script>
+</body>
+</html>
