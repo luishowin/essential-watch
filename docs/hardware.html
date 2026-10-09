@@ -8,7 +8,7 @@
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Handjet:wght@100..900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/site.css">
   <script>
     /* Apply the stored theme before first paint, so a dark reload never flashes white. */
@@ -24,9 +24,8 @@
 
   <nav class="nav">
     <div class="nav-inner">
-      <a class="nav-brand" href="index.html"><span class="dot"></span>Essential Watch</a>
+      <a class="nav-brand wordmark" href="index.html">Essential Watch</a>
       <div class="nav-links">
-        <a href="index.html">Overview</a>
         <a href="philosophy.html">Philosophy</a>
         <a href="hardware.html" aria-current="page">Hardware</a>
         <a href="emulator.html">Emulator</a>
@@ -41,7 +40,6 @@
       </button>
     </div>
     <div class="nav-panel" id="nav-panel" hidden>
-      <a href="index.html">Overview</a>
       <a href="philosophy.html">Philosophy</a>
       <a href="hardware.html" aria-current="page">Hardware</a>
       <a href="emulator.html">Emulator</a>
@@ -51,11 +49,14 @@
 
   <main>
 
-    <header class="hero container">
+    <header class="hero hero-compact">
+      <div class="hero-inner">
+
       <span class="kicker reveal">The hardware · spec digest</span>
       <h1 class="display reveal">Drafted in<br>the open.</h1>
       <p class="lede reveal">The single source of truth is the markdown specification living beside this site. This page is the working digest: what is decided, and what is still deliberately undecided.</p>
       <p class="mono reveal" style="margin-top: 20px">SPEC DRAFT V6 · UPDATED 2026-09-06 · SUPERSEDES V5</p>
+          </div>
     </header>
 
     <section class="section">
@@ -248,7 +249,7 @@
           <li>Games: the deliberate include or exclude call against the calm-tech thesis</li>
         </ol>
         <p style="margin-top: 36px" class="reveal">
-          <a class="btn-text" href="spec.html">Read the full spec</a>
+          <a class="btn-text" href="spec.html"><span>Read the full spec</span><svg class="btn__arrow" width="14" height="14" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M3 1.5 8.5 6 3 10.5" fill="none" stroke="currentColor" stroke-width="1"/></svg></a>
         </p>
       </div>
     </section>
@@ -261,7 +262,6 @@
         <div>
           <h4>Project</h4>
           <ul>
-            <li><a href="index.html">Overview</a></li>
             <li><a href="philosophy.html">Philosophy</a></li>
             <li><a href="hardware.html">Hardware</a></li>
           </ul>

@@ -73,6 +73,10 @@
     constructor(canvasEl) {
       this.canvas = canvasEl;
       this.ctx = canvasEl.getContext("2d");
+      /* Full-res backing store: modes still address a 128x64 logical grid,
+         but everything rasterizes at 3x so text renders sharp, not pixelated. */
+      var s = canvasEl.width / SCREEN_W;
+      this.ctx.scale(s, s);
       this.ctx.imageSmoothingEnabled = false;
     }
     clear() {
@@ -83,7 +87,7 @@
       size = size || 12;
       align = align || "left";
       color = color || COLOR_ON;
-      this.ctx.font = "700 " + size + "px 'Doto', monospace";
+      this.ctx.font = "500 " + size + "px Handjet, monospace";
       this.ctx.fillStyle = color;
       this.ctx.textAlign = align;
       this.ctx.fillText(str, x, y);
@@ -93,6 +97,25 @@
       this.ctx.fillStyle = COLOR_ON;
       if (filled) this.ctx.fillRect(x, y, w, h);
       else this.ctx.strokeRect(x, y, w, h);
+    }
+    circle(x, y, r, color, width) {
+      color = color || COLOR_ON;
+      width = width || 1;
+      this.ctx.strokeStyle = color;
+      this.ctx.lineWidth = width;
+      this.ctx.beginPath();
+      this.ctx.arc(x, y, r, 0, Math.PI * 2);
+      this.ctx.stroke();
+    }
+    line(x1, y1, x2, y2, color, width) {
+      color = color || COLOR_ON;
+      width = width || 1;
+      this.ctx.strokeStyle = color;
+      this.ctx.lineWidth = width;
+      this.ctx.beginPath();
+      this.ctx.moveTo(x1, y1);
+      this.ctx.lineTo(x2, y2);
+      this.ctx.stroke();
     }
   }
 
@@ -129,10 +152,29 @@
   class HomeMode extends Mode {
     draw(gfx) {
       var d = new Date();
-      var timeStr = d.toLocaleTimeString("en-US", { hour12: true, hour: "numeric", minute: "2-digit" });
-      var dateStr = d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
-      gfx.text(timeStr, SCREEN_W / 2, 30, 24, "center", COLOR_ON);
-      gfx.text(dateStr, SCREEN_W / 2, 50, 14, "center", COLOR_ON);
+      var days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+      var months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+
+      var h = d.getHours() % 12 || 12;
+      var timeStr = h + ":" + String(d.getMinutes()).padStart(2, "0");
+      var ampm = d.getHours() < 12 ? "AM" : "PM";
+      var dayStr = days[d.getDay()];
+      var restStr = d.getDate() + " " + months[d.getMonth()];
+
+      /* Center the time + meridiem as one group on both axes. */
+      gfx.ctx.font = "500 39px Handjet, monospace";
+      var wTime = gfx.ctx.measureText(timeStr).width;
+      gfx.ctx.font = "500 10px Handjet, monospace";
+      var wAmpm = gfx.ctx.measureText(ampm).width;
+      var gap = 4;
+      var x = SCREEN_W / 2 - (wTime + gap + wAmpm) / 2;
+      var right = x + wTime + gap + wAmpm;
+      /* Day opens where the time digits start; date + month close where the M ends. */
+      gfx.text(dayStr, x, 12, 10, "left", COLOR_ON);
+      gfx.text(restStr, right, 12, 10, "right", COLOR_ON);
+      var baseline = 52;
+      gfx.text(timeStr, x, baseline, 39, "left", COLOR_ON);
+      gfx.text(ampm, x + wTime + gap, baseline, 10, "left", COLOR_ON);
     }
     onInput(e, type) {
       if (type === "long_press" && e === "ENTER") this.os.switchMode("menu");
@@ -304,23 +346,52 @@
   }
 
   class WorkoutMode extends Mode {
-    constructor(os) { super(os); this.dist = 0; }
-    update(dt) { this.dist += 0.001; }
+    constructor(os) { super(os); this.t = 0; this.spin = ["-", "\\", "|", "/"]; }
+    enter() { this.t = 0; }
+    update(dt) { this.t += dt; }
+    fmt(ms) {
+      var s = Math.floor(ms / 1000);
+      return Math.floor(s / 60) + ":" + pad2(s % 60);
+    }
     draw(gfx) {
-      gfx.text("PACE  5:21", 5, 25, 18, "left", COLOR_ON);
-      gfx.text("HR    " + this.os.sensors.heartRate, 5, 45, 18, "left", COLOR_ON);
+      gfx.text("TIME  " + this.fmt(this.t), 5, 20, 14, "left", COLOR_ON);
+      var now = new Date();
+      var clock = (now.getHours() % 12 || 12) + ":" + pad2(now.getMinutes()) + " " + (now.getHours() < 12 ? "AM" : "PM");
+      gfx.text(clock, SCREEN_W - 5, 20, 10, "right", COLOR_DIM);
+      var paceStr = "PACE  " + this.fmt(this.t);
+      gfx.text(paceStr, 5, 38, 14, "left", COLOR_ON);
+      gfx.ctx.font = "500 14px Handjet, monospace";
+      gfx.text("min/km", 5 + gfx.ctx.measureText(paceStr).width + 4, 38, 10, "left", COLOR_DIM);
+      /* HR searches for ~3s with a spinning slash, then locks to the sensor. */
+      var hr = this.t < 3000
+        ? "-- " + this.spin[Math.floor(this.t / 150) % 4]
+        : this.os.sensors.heartRate;
+      gfx.text("HR    " + hr, 5, 56, 14, "left", COLOR_ON);
     }
     onInput(e) { if (e === "BTN2") this.os.switchMode("home"); }
   }
 
   class StopwatchMode extends Mode {
-    constructor(os) { super(os); this.t = 0; this.run = false; }
+    constructor(os) { super(os); this.t = 0; this.run = false; this.laps = []; }
+    enter() { this.t = 0; this.run = false; this.laps = []; }
     update(dt) { if (this.run) this.t += dt; }
+    fmt(ms) {
+      var s = ms / 1000;
+      return Math.floor(s / 60) + ":" + (s % 60).toFixed(2).padStart(5, "0");
+    }
     draw(gfx) {
       gfx.text("STOPWATCH", SCREEN_W / 2, 14, 12, "center", COLOR_DIM);
-      gfx.text((this.t / 1000).toFixed(2), SCREEN_W / 2, 40, 24, "center", COLOR_ON);
-      gfx.text(this.run ? "STOP" : "START", 10, 60, 10, "left", COLOR_ON);
-      gfx.text("RESET", SCREEN_W - 10, 60, 10, "right", COLOR_ON);
+      /* Counter stands as tall as the side labels are wide, clamped to fit. */
+      gfx.ctx.font = "500 8px Handjet, monospace";
+      var labelW = gfx.ctx.measureText("START/PAUSE").width;
+      var tStr = this.fmt(this.t);
+      var size = Math.min(labelW, 110 / (gfx.ctx.measureText(tStr).width / 8));
+      gfx.text("START/PAUSE", SCREEN_W - 5, 20, 8, "right", COLOR_DIM);
+      gfx.text("LAP/RESET", SCREEN_W - 5, 54, 8, "right", COLOR_DIM);
+      gfx.text(tStr, 5, 46, size, "left", COLOR_ON);
+      if (this.laps.length) {
+        gfx.text("L" + this.laps.length + " " + this.fmt(this.laps[this.laps.length - 1]), 5, 60, 10, "left", COLOR_DIM);
+      }
     }
     onInput(e, type) {
       if (type === "long_press" && e === "BTN2") {
@@ -329,7 +400,11 @@
       }
       if (type === "click") {
         if (e === "BTN1") this.run = !this.run;
-        if (e === "BTN2") { this.run = false; this.t = 0; }
+        /* Bottom button splits by state: lap while running, reset while paused. */
+        if (e === "BTN2") {
+          if (this.run) this.laps.push(this.t);
+          else { this.run = false; this.t = 0; this.laps = []; }
+        }
       }
     }
   }
@@ -344,9 +419,44 @@
   }
 
   class CompassMode extends Mode {
+    constructor(os) {
+      super(os);
+      this.display = null;
+      this.dirs = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
+    }
+    enter() { this.display = null; }
+    update(dt) {
+      /* Ease the needle toward the sensor: slow, gentle, shortest way round. */
+      var target = this.os.sensors.heading;
+      if (this.display === null) { this.display = target; return; }
+      var diff = ((target - this.display + 540) % 360) - 180;
+      this.display = (this.display + diff * Math.min(1, dt / 600) + 360) % 360;
+    }
     draw(gfx) {
-      gfx.text("COMPASS", SCREEN_W / 2, 20, 14, "center", COLOR_ON);
-      gfx.text(Math.floor(this.os.sensors.heading) + "°", SCREEN_W / 2, 45, 24, "center", COLOR_ON);
+      /* Stack is centered as a group: ring at cy 25, captions to baseline 62. */
+      var cx = SCREEN_W / 2, cy = 25, r = 19;
+      /* Tick ring, rotating. Cardinals run long + bright. */
+      gfx.circle(cx, cy, r, COLOR_ON, 0.5);
+      for (var i = 0; i < 12; i++) {
+        var a = (i * 30 - this.display) * Math.PI / 180;
+        var major = i % 3 === 0;
+        var len = major ? 4 : 2;
+        gfx.line(cx + Math.sin(a) * (r - len), cy - Math.cos(a) * (r - len),
+                 cx + Math.sin(a) * r, cy - Math.cos(a) * r,
+                 major ? COLOR_ON : COLOR_DIM, 0.5);
+      }
+      /* The ^ lives on the card at north: it rides the ring, pointing outward. */
+      var na = -this.display * Math.PI / 180;
+      var dx = Math.sin(na), dy = -Math.cos(na);
+      var px = Math.cos(na), py = Math.sin(na);
+      var ax = cx + dx * (r + 5), ay = cy + dy * (r + 5);
+      var fx = cx + dx * (r + 1), fy = cy + dy * (r + 1);
+      gfx.line(ax, ay, fx + px * 3, fy + py * 3, COLOR_ON, 1);
+      gfx.line(ax, ay, fx - px * 3, fy - py * 3, COLOR_ON, 1);
+      var h = Math.floor(this.display);
+      gfx.text(h + "°", cx, 26, 12, "center", COLOR_ON);
+      gfx.text(this.dirs[Math.round(h / 22.5) % 16], cx, 37, 10, "center", COLOR_ON);
+      gfx.text("BARO 1ATM 0m", cx, 53, 8, "center", COLOR_DIM);
     }
     onInput(e) { if (e === "BTN2") this.os.switchMode("home"); }
   }

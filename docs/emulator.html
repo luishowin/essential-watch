@@ -8,7 +8,7 @@
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&family=Doto:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Handjet:wght@100..900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/site.css">
   <script>
     /* Apply the stored theme before first paint, so a dark reload never flashes white. */
@@ -24,9 +24,8 @@
 
   <nav class="nav">
     <div class="nav-inner">
-      <a class="nav-brand" href="index.html"><span class="dot"></span>Essential Watch</a>
+      <a class="nav-brand wordmark" href="index.html">Essential Watch</a>
       <div class="nav-links">
-        <a href="index.html">Overview</a>
         <a href="philosophy.html">Philosophy</a>
         <a href="hardware.html">Hardware</a>
         <a href="emulator.html" aria-current="page">Emulator</a>
@@ -41,7 +40,6 @@
       </button>
     </div>
     <div class="nav-panel" id="nav-panel" hidden>
-      <a href="index.html">Overview</a>
       <a href="philosophy.html">Philosophy</a>
       <a href="hardware.html">Hardware</a>
       <a href="emulator.html" aria-current="page">Emulator</a>
@@ -51,11 +49,14 @@
 
   <main>
 
-    <header class="hero container">
+    <header class="hero hero-compact">
+      <div class="hero-inner">
+
       <span class="kicker reveal">The emulator</span>
       <h1 class="display reveal">The watch,<br>before the watch.</h1>
       <p class="lede reveal">Every interaction gets tested here first, in pixels, where changing your mind costs nothing. This is the Essential Watch OS running today, a 128 by 64 monochrome panel driven by the same mode machine the firmware will use.</p>
-      <p class="mono reveal" style="margin-top: 20px">EMULATOR 1.0 · CANVAS 128×64 · VANILLA JS</p>
+      <p class="mono reveal" style="margin-top: 20px">EMULATOR 1.1 · 128×64 LOGICAL · 3× FULL-RES · HANDJET</p>
+          </div>
     </header>
 
     <section class="section">
@@ -63,8 +64,7 @@
         <div class="emulator-stage">
           <div class="device-wrap reveal">
             <div id="device" tabindex="0" role="application" aria-label="Essential Watch emulator. Arrow keys rotate the crown, Enter presses it, Z and X are the buttons.">
-              <canvas id="display" width="128" height="64" aria-label="Emulated watch screen"></canvas>
-              <div class="device-scanlines" aria-hidden="true"></div>
+              <canvas id="display" width="384" height="192" aria-label="Emulated watch screen"></canvas>
               <button class="device-btn btn-upper" type="button" aria-label="Button one, select"></button>
               <button class="device-btn crown" type="button" aria-label="Crown. Tap the top to rotate up, the bottom to rotate down, the middle to press."></button>
               <button class="device-btn btn-lower" type="button" aria-label="Button two, back"></button>
@@ -129,7 +129,7 @@
           </div>
         </div>
         <p style="margin-top: 36px" class="reveal">
-          <a class="btn-text" href="journal.html">Track the next emulator milestone</a>
+          <a class="btn-text" href="journal.html"><span>Track the next emulator milestone</span><svg class="btn__arrow" width="14" height="14" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M3 1.5 8.5 6 3 10.5" fill="none" stroke="currentColor" stroke-width="1"/></svg></a>
         </p>
       </div>
     </section>
@@ -146,19 +146,19 @@
             <span class="kicker">2025-11-20</span>
             <h3>Emulator 1.0</h3>
             <p>The baseline. A 128 by 64 monochrome panel, cyan on black, a game loop and a Mode class hierarchy in one HTML file. This is the architecture the current build inherits.</p>
-            <p style="margin-top:16px"><a class="btn-text" href="emulator1.0.html">Open 1.0</a></p>
+            <p style="margin-top:16px"><a class="btn-text" href="emulator1.0.html"><span>Open 1.0</span><svg class="btn__arrow" width="14" height="14" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M3 1.5 8.5 6 3 10.5" fill="none" stroke="currentColor" stroke-width="1"/></svg></a></p>
           </div>
           <div class="card reveal">
             <span class="kicker">Concept</span>
             <h3>Emulator 2.0</h3>
             <p>The same panel with a wider mode set: menu, stopwatch, workout, compass, alarms, info. A grey case, a blue OLED, and a mode stack instead of a flat registry.</p>
-            <p style="margin-top:16px"><a class="btn-text" href="emulator2.0.html">Open 2.0</a></p>
+            <p style="margin-top:16px"><a class="btn-text" href="emulator2.0.html"><span>Open 2.0</span><svg class="btn__arrow" width="14" height="14" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M3 1.5 8.5 6 3 10.5" fill="none" stroke="currentColor" stroke-width="1"/></svg></a></p>
           </div>
           <div class="card reveal">
             <span class="kicker">2026-04-27</span>
             <h3>Emulator 3.0</h3>
             <p>A large round canvas, touch first, chassis rendered in CSS. It explored more pixels and a finger instead of keys, and earned the conclusion that the 128 by 64 restraint is the product.</p>
-            <p style="margin-top:16px"><a class="btn-text" href="emulator3.0.html">Open 3.0</a></p>
+            <p style="margin-top:16px"><a class="btn-text" href="emulator3.0.html"><span>Open 3.0</span><svg class="btn__arrow" width="14" height="14" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M3 1.5 8.5 6 3 10.5" fill="none" stroke="currentColor" stroke-width="1"/></svg></a></p>
           </div>
         </div>
       </div>
@@ -172,7 +172,6 @@
         <div>
           <h4>Project</h4>
           <ul>
-            <li><a href="index.html">Overview</a></li>
             <li><a href="philosophy.html">Philosophy</a></li>
             <li><a href="hardware.html">Hardware</a></li>
           </ul>

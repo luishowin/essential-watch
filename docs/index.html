@@ -8,7 +8,7 @@
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Handjet:wght@100..900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/site.css">
   <script>
     /* Apply the stored theme before first paint, so a dark reload never flashes white. */
@@ -24,9 +24,8 @@
 
   <nav class="nav">
     <div class="nav-inner">
-      <a class="nav-brand" href="index.html"><span class="dot"></span>Essential Watch</a>
+      <a class="nav-brand wordmark" href="index.html">Essential Watch</a>
       <div class="nav-links">
-        <a href="index.html" aria-current="page">Overview</a>
         <a href="philosophy.html">Philosophy</a>
         <a href="hardware.html">Hardware</a>
         <a href="emulator.html">Emulator</a>
@@ -41,7 +40,6 @@
       </button>
     </div>
     <div class="nav-panel" id="nav-panel" hidden>
-      <a href="index.html" aria-current="page">Overview</a>
       <a href="philosophy.html">Philosophy</a>
       <a href="hardware.html">Hardware</a>
       <a href="emulator.html">Emulator</a>
@@ -51,39 +49,20 @@
 
   <main>
 
-    <header class="hero container">
-      <span class="kicker reveal">Personal product project · In progress</span>
-      <h1 class="display reveal">Essential Watch.</h1>
-      <p class="lede reveal">A calm, repairable wrist instrument that lives between the Casio F-91W and the Apple Watch Ultra. Accessible enough for everyday wear. Tough enough for the trail.</p>
-      <div class="cta-row reveal">
-        <a class="btn btn-primary" href="philosophy.html">Read the philosophy</a>
-        <a class="btn btn-outline" href="emulator.html">Try the emulator</a>
-      </div>
-      <figure class="hero-media reveal">
-        <img src="media/hero-ocean.jpg" alt="Placeholder image: a wrist watch worn in the ocean surf" width="736" height="736">
+    <header class="hero">
+      <figure class="hero-media">
+        <img src="media/hero-ocean.jpg" alt="A wrist watch worn in the ocean surf" width="1600" height="900" fetchpriority="high" decoding="async">
       </figure>
-    </header>
-
-    <section class="container" aria-label="Headline targets">
-      <div class="stat-band" data-stagger>
-        <div class="stat reveal">
-          <span class="value">30</span>
-          <span class="label">days of battery, target</span>
-        </div>
-        <div class="stat reveal">
-          <span class="value">10 ATM</span>
-          <span class="label">water resistance</span>
-        </div>
-        <div class="stat reveal">
-          <span class="value">42×36×9</span>
-          <span class="label">millimetres, target case</span>
-        </div>
-        <div class="stat reveal">
-          <span class="value">29 g</span>
-          <span class="label">target mass, with strap</span>
+      <div class="hero-inner">
+        <span class="kicker reveal">Personal product project · In progress</span>
+        <h1 class="display reveal">Essential <em>Watch.</em></h1>
+        <p class="lede reveal">A calm, repairable wrist instrument that lives between the Casio F-91W and the Apple Watch Ultra. Accessible enough for everyday wear. Tough enough for the trail.</p>
+        <div class="cta-row reveal">
+          <a class="btn btn-primary" href="philosophy.html"><span>Read the philosophy</span><svg class="btn__arrow" width="14" height="14" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M3 1.5 8.5 6 3 10.5" fill="none" stroke="currentColor" stroke-width="1"/></svg></a>
+          <a class="btn btn-outline" href="emulator.html"><span>Try the emulator</span><svg class="btn__arrow" width="14" height="14" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M3 1.5 8.5 6 3 10.5" fill="none" stroke="currentColor" stroke-width="1"/></svg></a>
         </div>
       </div>
-    </section>
+    </header>
 
     <section class="section">
       <div class="container">
@@ -136,6 +115,24 @@
             <p>Everything a wrist computer can do, at the cost of daily charging and an app ecosystem that wants your evening.</p>
           </div>
         </div>
+        <div class="stat-band" data-stagger aria-label="Headline targets">
+          <div class="stat reveal">
+            <span class="value">30</span>
+            <span class="label">days of battery, target</span>
+          </div>
+          <div class="stat reveal">
+            <span class="value">10 ATM</span>
+            <span class="label">water resistance</span>
+          </div>
+          <div class="stat reveal">
+            <span class="value">42×36×9</span>
+            <span class="label">millimetres, target case</span>
+          </div>
+          <div class="stat reveal">
+            <span class="value">29 g</span>
+            <span class="label">target mass, with strap</span>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -148,14 +145,14 @@
         </div>
         <div class="chip-row reveal" data-stagger>
           <span class="chip done">spec v6 · drafted</span>
-          <span class="chip done">emulator 1.0 · baseline running</span>
+          <span class="chip done">emulator 1.1 · running</span>
           <span class="chip done">project site · live</span>
           <span class="chip active">ux trials · in progress</span>
           <span class="chip next">industrial design</span>
           <span class="chip next">prototype</span>
         </div>
         <p style="margin-top: 36px" class="reveal">
-          <a class="btn-text" href="journal.html">Follow the journal</a>
+          <a class="btn-text" href="journal.html"><span>Follow the journal</span><svg class="btn__arrow" width="14" height="14" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M3 1.5 8.5 6 3 10.5" fill="none" stroke="currentColor" stroke-width="1"/></svg></a>
         </p>
       </div>
     </section>
@@ -171,13 +168,13 @@
             <span class="kicker">Software first</span>
             <h3>The emulator</h3>
             <p>The watch OS runs in the browser today, before any circuit board exists. Every interaction gets tested where iteration is cheap: in pixels.</p>
-            <p style="margin-top:16px"><a class="btn-text" href="emulator.html">Open the emulator</a></p>
+            <p style="margin-top:16px"><a class="btn-text" href="emulator.html"><span>Open the emulator</span><svg class="btn__arrow" width="14" height="14" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M3 1.5 8.5 6 3 10.5" fill="none" stroke="currentColor" stroke-width="1"/></svg></a></p>
           </div>
           <div class="card reveal">
             <span class="kicker">Hardware next</span>
             <h3>The specification</h3>
             <p>Draft v6 of the hardware spec is the single source of truth: case, display, sensors, input, haptics, and the open questions still waiting on prototyping.</p>
-            <p style="margin-top:16px"><a class="btn-text" href="hardware.html">Read the digest</a></p>
+            <p style="margin-top:16px"><a class="btn-text" href="hardware.html"><span>Read the digest</span><svg class="btn__arrow" width="14" height="14" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M3 1.5 8.5 6 3 10.5" fill="none" stroke="currentColor" stroke-width="1"/></svg></a></p>
           </div>
         </div>
       </div>
@@ -191,7 +188,6 @@
         <div>
           <h4>Project</h4>
           <ul>
-            <li><a href="index.html">Overview</a></li>
             <li><a href="philosophy.html">Philosophy</a></li>
             <li><a href="hardware.html">Hardware</a></li>
           </ul>
