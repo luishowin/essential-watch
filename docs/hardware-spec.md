@@ -1,5 +1,5 @@
 # Essential Watch — Hardware Specification (Draft v6)
-*Updated September 6, 2026 — supersedes v5. Primary change in v6: display technology moved from e-paper to a monochrome OLED panel, with knock-on updates to illumination, stopwatch rendering, power budgeting, and open items.*
+*Updated November 24, 2026 — specifies the Casio F-91W strap interface as a design target. Draft v6 supersedes v5 and moves from e-paper to a monochrome OLED panel.*
 
 **Design thesis:** Repairable, craft-built "instrument" watch positioned against Pebble's mass-market nostalgia play and Garmin/Apple's feature-maximalism — calm by default, with select rugged-utility features borrowed deliberately where they earn their place.
 
@@ -15,9 +15,11 @@
 - **Back cover:** Removable, secured by 4× Torx screws, gasket-sealed — repairable by design; also the access point for the internal recovery interface
 - **Water resistance target:** 10 ATM (100m)
 - **Operating temperature:** -20°C to 50°C — requires explicit sourcing of an OLED panel and battery cell both rated to -20°C (many off-the-shelf panels are room-temp only; OLED emission and response degrade at the cold end); expect derated battery life and optical HR/SpO2 accuracy at the cold end
-- **Strap:** Quick-release, swappable; default = metal link bracelet
-  - **Strap width:** quick-release standard — 20mm proposed as default, confirm against final case dimensions
-- **Charging interface:** Magnetic, spring-loaded pogo-pin contact integrated into one bracelet link (no in-case port), power-only. Mates with a charging puck ending in a **female USB-C receptacle**.
+- **Strap:** Design for direct fit with the genuine Casio F-91W-1 two-piece resin replacement band (71604002) and its push pins (pin rod 72012003). Fit is pending case CAD and prototype validation. [F-91W-1 parts listing](https://pacparts.com/casio-f91w-1-2)
+  - **Nominal dimensions:** The reference band is listed with an 18 mm lug width and a 22 mm overall band width. The shaped strap end and the push-pin mount both affect fit, so the lug width alone cannot establish compatibility. [Reference band dimensions and mount](https://www.mastersintime.com/casio-f-91w-black-resin-strap-71604002.htm)
+  - **Case CAD:** Measure both strap ends, the pins and the donor case. Record the actual lug gap, strap-end profile and shoulder clearance, pin-axis offsets from the case end and underside, and pin and lug-bore dimensions. Specify tolerances, pin retention and tool access for installation and removal.
+  - **Prototype fit:** Install both strap halves with the reference pins. Check side play, pivot range, and case and back-cover clearance through wrist wrap. Check pin retention under pull and after repeated strap swaps. Verify fit for each aftermarket F-91W replacement before listing it as compatible.
+- **Charging interface:** Magnetic, spring-loaded pogo-pin charging puck ending in a **female USB-C receptacle**, power-only. Contact placement is open and must accommodate the unmodified F-91W strap.
 - **Finish:** Two colorways — natural grey via standard/hardcoat anodizing; jet black via hardcoat black anodize (better long-term UV/wear stability than dye black) or PVD (deepest black, higher cost). Anodizing dimensional buildup must be accounted for in O-ring grooves, screw bosses, crown guard fit, and pogo contact flatness.
 - **Crown guard:** Protrudes to dial height, minimal profile to avoid interfering with normal finger access. Protects the external magnet/cap assembly's alignment from shear impact — a lighter structural job than a traditional dive-watch guard, since there's no pressurized mechanical stem seal to protect.
 
@@ -78,8 +80,8 @@
 ## Open Items / Pending Decisions
 1. Flash budget ceiling for watchface assets (fonts/bitmaps) within the ~400–470KB single-image limit
 2. Compile toolchain accessibility (server-side/in-browser vs. docs-only)
-3. Charging contact placement — strap-only vs. also-on-case-lug
-4. Strap width final confirmation against case CAD
+3. Charging contact placement compatible with the unmodified F-91W strap
+4. F-91W strap fit — measure the reference strap, pins and donor lugs, then verify clearance, articulation and pin retention on a case prototype
 5. Magnetic pogo-pin connector — contact count, spacing, pull strength (bench-test)
 6. Piezo relocation off the back panel — acoustic prototype/listening test
 7. Piezo acoustic tuning (tone-sequencer design)

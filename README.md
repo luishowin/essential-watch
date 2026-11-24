@@ -92,4 +92,7 @@ source. Section headings and the numbered open items get stable anchors, which m
 specific pending decision is directly linkable: `spec.html#oi-12` is the OLED panel
 selection that gates the power model.
 
+The case design targets the Casio F-91W-1 replacement resin strap and push pins.
+The 18 mm nominal lug width is a starting point. Prototype fit is pending.
+
 Edit the markdown. The site follows.
